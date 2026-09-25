@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { Account, F, Facts } from '../types';
+import { Account, F, Facts, SourceFileHandle } from '../types';
 import { DatasetDb } from '../utils/dataset.db';
 import { ProviderFetch } from '../utils/provider.fetch';
 import { AccountStore } from './account';
@@ -75,6 +75,45 @@ export class FactsStore {
         this.accounts.setActive(account.id);
         this.facts.set(facts);
         this.loading.set(false);
+    }
+
+    async importFromHandle(account: Account, handle: SourceFileHandle) {
+        const file = await handle.getFile();
+        const parsed = JSON.parse(await file.text());
+        await this.importFacts(account, parsed);
+        if (!this.error()) {
+            await this.db.putHandle(account.id, handle);
+            this.accounts.update(account.id, { sourceName: file.name });
+        }
+    }
+
+    async refreshJson(account: Account): Promise<boolean> {
+        const handle = await this.db.getHandle(account.id);
+        if (!handle) {
+            return false;
+        }
+        if (!(await this.ensureReadable(handle))) {
+            this.error.set('Permission to read the saved file was declined.');
+            return false;
+        }
+        try {
+            await this.importFromHandle(account, handle);
+            return !this.error();
+        } catch {
+            this.error.set('Could not read the saved file — it may have moved or been deleted. Choose it again.');
+            return false;
+        }
+    }
+
+    private async ensureReadable(handle: SourceFileHandle): Promise<boolean> {
+        if (!handle.queryPermission || !handle.requestPermission) {
+            return true;
+        }
+        const descriptor = { mode: 'read' } as const;
+        if ((await handle.queryPermission(descriptor)) === 'granted') {
+            return true;
+        }
+        return (await handle.requestPermission(descriptor)) === 'granted';
     }
 
     async refreshFromProvider(account: Account) {

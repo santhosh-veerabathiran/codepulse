@@ -14,6 +14,7 @@ export interface Account {
     repos?: string[];
     createdAt: number;
     dataAt?: number;
+    sourceName?: string;
 }
 
 export interface StoredDataset {

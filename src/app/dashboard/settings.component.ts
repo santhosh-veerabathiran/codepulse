@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Account, SourceKind, AccountStore, FactsStore, NavStore, format } from '../core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Account, AccountStore, FactsStore, FilePickerWindow, NavStore, SourceFileHandle, SourceKind, format } from '../core';
 @Component({
     selector: 'cp-settings',
     standalone: true,
@@ -23,18 +23,24 @@ import { Account, SourceKind, AccountStore, FactsStore, NavStore, format } from 
                         </div>
                     </div>
                     <div class="btnrow">
-                        <button type="button" [disabled]="fetching()" (click)="refresh(a)">↻ Refresh from remote</button>
-                        <label class="fbtn">
-                            <input type="file" accept="application/json,.json" (change)="onFile($event, a)" />
-                            Re-import snapshot
-                        </label>
+                        @if (a.kind === Json) {
+                            <button type="button" [disabled]="busy()" (click)="refreshFile(a)" title="Re-read the remembered snapshot file">↻ Refresh from file</button>
+                            <button type="button" [disabled]="busy()" (click)="pickInto(a)">Choose file…</button>
+                        } @else {
+                            <button type="button" [disabled]="fetching()" (click)="refresh(a)">↻ Refresh from remote</button>
+                        }
+                        <button type="button" (click)="editDetails(a)">Edit details</button>
                     </div>
+                    @if (a.sourceName) {
+                        <p class="msg src">from {{ a.sourceName }}</p>
+                    }
                     @if (fetching()) {
                         <p class="msg">{{ fetchMsg() || 'Fetching from provider…' }}</p>
                     }
                     @if (msg()) {
                         <p class="msg">{{ msg() }}</p>
                     }
+                    <input #fileInput type="file" accept="application/json,.json" hidden (change)="onFile($event)" />
                 } @else {
                     <p class="empty">No workspace selected.</p>
                 }
@@ -50,6 +56,7 @@ import { Account, SourceKind, AccountStore, FactsStore, NavStore, format } from 
                             <span class="sn">{{ a.label }}</span>
                             <span class="sd">{{ a.dataAt ? 'data ready' : 'no data' }}</span>
                             <button type="button" class="mini" (click)="switch(a.id)" [disabled]="a.id === activeId()">Open</button>
+                            <button type="button" class="mini" (click)="editDetails(a)">Edit</button>
                             <button type="button" class="mini danger" (click)="askRemove.set(a.id)">Remove</button>
                         </div>
                         @if (askRemove() === a.id) {
@@ -287,11 +294,16 @@ export class SettingsComponent {
     protected readonly activeId = this.accountStore.activeId;
     protected readonly active = this.accountStore.active;
 
+    protected readonly Json = SourceKind.Json;
     protected readonly confirmClear = signal<boolean>(false);
     protected readonly askRemove = signal<string | undefined>(undefined);
     protected readonly msg = signal<string>('');
+    protected readonly busy = signal<boolean>(false);
     protected readonly fetching = this.factsStore.fetching;
     protected readonly fetchMsg = this.factsStore.fetchMsg;
+    protected readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
+    private readonly picker = window as unknown as FilePickerWindow;
+    private pendingFile?: Account;
 
     protected readonly counts = computed<string>(() => {
         const g = this.factsStore.facts()?.grand;
@@ -313,16 +325,60 @@ export class SettingsComponent {
     }
 
     protected refresh(account: Account) {
-        if (account.kind === SourceKind.Json) {
-            this.msg.set('This workspace was imported from a file — use "Re-import snapshot" to update it.');
-            return;
-        }
         if (!account.repos?.length) {
             this.msg.set('No repositories are configured for this account — remove it and reconnect with repo paths.');
             return;
         }
         this.msg.set('');
         void this.factsStore.refreshFromProvider(account);
+    }
+
+    protected async refreshFile(account: Account) {
+        this.msg.set('');
+        this.busy.set(true);
+        let refreshed = false;
+        try {
+            refreshed = await this.factsStore.refreshJson(account);
+        } finally {
+            this.busy.set(false);
+        }
+        if (refreshed) {
+            this.msg.set('Refreshed from the saved file.');
+            return;
+        }
+        await this.pickInto(account);
+    }
+
+    protected async pickInto(account: Account) {
+        this.msg.set('');
+        if (!this.picker.showOpenFilePicker) {
+            this.pendingFile = account;
+            this.fileInput()?.nativeElement.click();
+            return;
+        }
+        let handle: SourceFileHandle | undefined;
+        try {
+            const handles = await this.picker.showOpenFilePicker({ types: [{ description: 'CodePulse snapshot', accept: { 'application/json': ['.json'] } }] });
+            handle = handles[0];
+        } catch {
+            return;
+        }
+        if (!handle) {
+            return;
+        }
+        this.busy.set(true);
+        try {
+            await this.factsStore.importFromHandle(account, handle);
+        } finally {
+            this.busy.set(false);
+        }
+        if (!this.factsStore.error()) {
+            this.msg.set('Snapshot imported.');
+        }
+    }
+
+    protected editDetails(account: Account) {
+        this.nav.editAccount(account.id);
     }
 
     protected addWorkspace() {
@@ -340,10 +396,13 @@ export class SettingsComponent {
         this.askRemove.set(undefined);
     }
 
-    protected onFile(event: Event, account: Account) {
+    protected onFile(event: Event) {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
-        if (!file) {
+        const account = this.pendingFile;
+        this.pendingFile = undefined;
+        if (!file || !account) {
+            input.value = '';
             return;
         }
         const reader = new FileReader();
@@ -357,5 +416,6 @@ export class SettingsComponent {
             }
         };
         reader.readAsText(file);
+        input.value = '';
     }
 }

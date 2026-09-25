@@ -5,6 +5,7 @@ export interface RawCommit {
     repo: string;
     add: number;
     del: number;
+    cats?: number[];
     type: string;
     merge: boolean;
     sha: string;

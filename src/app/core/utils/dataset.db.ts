@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Facts } from '../types';
+import { Facts, SourceFileHandle } from '../types';
 
 const DB_NAME = 'codepulse';
 const STORE = 'datasets';
-const VERSION = 1;
+const HANDLE_STORE = 'handles';
+const VERSION = 2;
 
 @Injectable({ providedIn: 'root' })
 export class DatasetDb {
@@ -11,14 +12,14 @@ export class DatasetDb {
 
     async put(accountId: string, facts: Facts) {
         const db = await this.open();
-        await this.tx(db, 'readwrite', (store) => {
+        await this.tx(db, STORE, 'readwrite', (store) => {
             return store.put({ id: accountId, facts, at: Date.now() });
         });
     }
 
     async get(accountId: string): Promise<Facts | undefined> {
         const db = await this.open();
-        const row = await this.tx<{ facts: Facts } | undefined>(db, 'readonly', (store) => {
+        const row = await this.tx<{ facts: Facts } | undefined>(db, STORE, 'readonly', (store) => {
             return store.get(accountId);
         });
         return row?.facts;
@@ -26,7 +27,30 @@ export class DatasetDb {
 
     async delete(accountId: string) {
         const db = await this.open();
-        await this.tx(db, 'readwrite', (store) => {
+        await this.tx(db, STORE, 'readwrite', (store) => {
+            return store.delete(accountId);
+        });
+        await this.deleteHandle(accountId);
+    }
+
+    async putHandle(accountId: string, handle: SourceFileHandle) {
+        const db = await this.open();
+        await this.tx(db, HANDLE_STORE, 'readwrite', (store) => {
+            return store.put({ id: accountId, handle });
+        });
+    }
+
+    async getHandle(accountId: string): Promise<SourceFileHandle | undefined> {
+        const db = await this.open();
+        const row = await this.tx<{ handle: SourceFileHandle } | undefined>(db, HANDLE_STORE, 'readonly', (store) => {
+            return store.get(accountId);
+        });
+        return row?.handle;
+    }
+
+    async deleteHandle(accountId: string) {
+        const db = await this.open();
+        await this.tx(db, HANDLE_STORE, 'readwrite', (store) => {
             return store.delete(accountId);
         });
     }
@@ -36,8 +60,12 @@ export class DatasetDb {
             this.dbPromise = new Promise((resolve, reject) => {
                 const req = indexedDB.open(DB_NAME, VERSION);
                 req.onupgradeneeded = () => {
-                    if (!req.result.objectStoreNames.contains(STORE)) {
-                        req.result.createObjectStore(STORE, { keyPath: 'id' });
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(STORE)) {
+                        db.createObjectStore(STORE, { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains(HANDLE_STORE)) {
+                        db.createObjectStore(HANDLE_STORE, { keyPath: 'id' });
                     }
                 };
                 req.onsuccess = () => {
@@ -51,9 +79,9 @@ export class DatasetDb {
         return this.dbPromise;
     }
 
-    private tx<T>(db: IDBDatabase, mode: IDBTransactionMode, run: (store: IDBObjectStore) => IDBRequest): Promise<T> {
+    private tx<T>(db: IDBDatabase, storeName: string, mode: IDBTransactionMode, run: (store: IDBObjectStore) => IDBRequest): Promise<T> {
         return new Promise((resolve, reject) => {
-            const request = run(db.transaction(STORE, mode).objectStore(STORE));
+            const request = run(db.transaction(storeName, mode).objectStore(storeName));
             request.onsuccess = () => {
                 return resolve(request.result as T);
             };

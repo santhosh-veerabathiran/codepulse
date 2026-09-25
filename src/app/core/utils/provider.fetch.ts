@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Account, Facts, RawCommit, RawMr, SourceKind } from '../types';
 import { CONVENTIONAL_COMMIT_RE, KNOWN_TYPES } from '../constants/data';
+import { Account, Facts, RawCommit, RawMr, SourceKind } from '../types';
+import { categorizeChanges } from './categorize';
+
+// Per-commit detail calls (needed for line stats) are one request each, so cap how
+// many we make against a repo to stay well inside the API rate limit on large repos.
+const GITHUB_STATS_CAP = 400;
 
 @Injectable({ providedIn: 'root' })
 export class ProviderFetch {
@@ -46,17 +51,39 @@ export class ProviderFetch {
         const commits: RawCommit[] = [];
         const mrs: RawMr[] = [];
         for (const repo of account.repos || []) {
-            note(`GitHub: ${repo}`);
+            note(`GitHub: ${repo} — listing commits`);
             const cs = await this.pageAll(`${base}/repos/${repo}/commits?per_page=100`, headers);
+            let statted = 0;
             for (const c of cs) {
-                commits.push(this.normalizeGitHubCommit(c as Record<string, any>, repo));
+                const raw = c as Record<string, any>;
+                const isMerge = (raw['parents'] || []).length > 1;
+                let detail: Record<string, any> | undefined;
+                if (!isMerge && statted < GITHUB_STATS_CAP) {
+                    detail = await this.fetchOne(`${base}/repos/${repo}/commits/${raw['sha']}`, headers);
+                    if (detail) {
+                        statted++;
+                        if (statted % 25 === 0) {
+                            note(`GitHub: ${repo} — line stats for ${statted} commits`);
+                        }
+                    }
+                }
+                commits.push(this.normalizeGitHubCommit(raw, repo, detail));
             }
+            note(`GitHub: ${repo} — pull requests`);
             const ps = await this.pageAll(`${base}/repos/${repo}/pulls?state=all&per_page=100`, headers);
             for (const p of ps) {
                 mrs.push(this.normalizeGitHubPr(p as Record<string, any>, repo));
             }
         }
         return this.assemble(commits, mrs);
+    }
+
+    private async fetchOne(url: string, headers: Record<string, string>): Promise<Record<string, any> | undefined> {
+        const res = await fetch(url, { headers });
+        if (!res.ok) {
+            return undefined;
+        }
+        return (await res.json()) as Record<string, any>;
     }
 
     private async pageAll(url: string, headers: Record<string, string>): Promise<unknown[]> {
@@ -132,15 +159,18 @@ export class ProviderFetch {
         };
     }
 
-    private normalizeGitHubCommit(c: Record<string, any>, repo: string): RawCommit {
+    private normalizeGitHubCommit(c: Record<string, any>, repo: string, detail?: Record<string, any>): RawCommit {
         const title = String(c['commit']?.['message'] || '').split('\n')[0];
+        const stats = detail?.['stats'] || {};
+        const files = detail?.['files'] as { filename?: string; additions?: number; deletions?: number }[] | undefined;
         return {
             date: String(c['commit']?.['author']?.['date'] || '').slice(0, 10),
             authorKey: (c['author']?.['login'] || c['commit']?.['author']?.['email'] || '?').toLowerCase(),
             authorName: String(c['commit']?.['author']?.['name'] || '?'),
             repo,
-            add: 0,
-            del: 0,
+            add: Number(stats['additions'] || 0),
+            del: Number(stats['deletions'] || 0),
+            cats: files ? categorizeChanges(files) : undefined,
             type: this.typeOf(title),
             merge: (c['parents'] || []).length > 1,
             sha: String(c['sha'] || ''),
@@ -212,12 +242,12 @@ export class ProviderFetch {
                 MG.push([c.date, pi, ri, 0]);
                 continue;
             }
-            const code = c.add;
+            const cats = c.cats ?? [c.add, 0, 0, 0, 0, 0];
             const big = c.add + c.del >= 400 ? CM.length : -1;
             if (big >= 0) {
                 CM.push([c.sha, c.title]);
             }
-            F.push([c.date, pi, ri, typeIdx.get(c.type) ?? 11, -1, c.add, c.del, code, 0, 0, 0, 0, 0, 0, code, big, 0, 0]);
+            F.push([c.date, pi, ri, typeIdx.get(c.type) ?? 11, -1, c.add, c.del, cats[0], cats[1], cats[2], cats[3], cats[4], cats[5], 0, cats[0], big, 0, 0]);
             commitCount[pi] = (commitCount[pi] || 0) + 1;
         }
         const MR: (string | number)[][] = [];
