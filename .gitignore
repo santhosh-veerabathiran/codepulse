@@ -1,0 +1,13 @@
+node_modules/
+dist/
+out-tsc/
+.angular/
+npm-debug.log*
+.DS_Store
+
+# Local contribution data — PII, never commit (imported at runtime, stored in the browser)
+src/assets/facts.json
+src/assets/dashboard.html
+*.snapshot.json
+src/assets/repo-groups.json
+src/assets/dashboard-config.json
