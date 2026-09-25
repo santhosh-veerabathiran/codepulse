@@ -26,6 +26,7 @@ export const TOKEN_VARS: Record<string, string> = {
     radius: '--radius',
     blur: '--blur',
     mesh: '--mesh',
+    vignette: '--vignette',
     shadow1: '--sh-1',
     shadow2: '--sh-2',
     accentItalic: '--accent-italic',

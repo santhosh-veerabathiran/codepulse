@@ -20,20 +20,8 @@
         "glass": "linear-gradient(150deg, rgba(12,32,52,0.70), rgba(12,32,52,0.54))",
         "glassBorder": "rgba(255,255,255,.16)",
         "glassSheen": "rgba(255,255,255,0.10)",
-        "series": [
-            "#4cc7ff",
-            "#22d3ee",
-            "#facc15",
-            "#4ade80",
-            "#a78bfa",
-            "#fb7185",
-            "#f472b6",
-            "#60a5fa"
-        ],
-        "gradient": [
-            "#38bdf8",
-            "#22d3ee"
-        ],
+        "series": ["#4cc7ff", "#22d3ee", "#facc15", "#4ade80", "#a78bfa", "#fb7185", "#f472b6", "#60a5fa"],
+        "gradient": ["#38bdf8", "#22d3ee"],
         "good": "#34d399",
         "warn": "#fbbf24",
         "bad": "#fb7185",

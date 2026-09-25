@@ -7,76 +7,75 @@
    ============================================================ */
 
 :root {
-    /* fonts — system stack, matching the reference dashboard */
-    --font: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --font-d: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
-    --icon-stroke: 1.8;
+    /* fonts — Inter for UI, JetBrains Mono for numerals */
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-d: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --icon-stroke: 1.6;
     /* Theme-controlled emphasis: some themes render captions/quotes in italic. */
     --accent-italic: normal;
 
-    /* surfaces — Aurora Glass defaults (ThemeService overrides at runtime) */
-    --app: #04121c;
-    --surface: #0e2532;
-    --surface-2: #143342;
-    --raise: #123240;
-    --glass: rgba(11, 28, 38, 0.52);
-    --glass-brd: rgba(255, 255, 255, 0.16);
-    --glass-sheen: rgba(255, 255, 255, 0.13);
+    /* surfaces — Onyx refined-dark defaults (ThemeService overrides at runtime) */
+    --app: #0b0c0e;
+    --surface: #141518;
+    --surface-2: #1c1e22;
+    --raise: #1c1e22;
+    --glass: #141518;
+    --glass-brd: rgba(255, 255, 255, 0.08);
+    --glass-sheen: rgba(255, 255, 255, 0.035);
 
     /* text */
-    --ink: #eaf3f7;
-    --ink-2: #a6bcc6;
-    --muted: #6e8894;
+    --ink: #edeef0;
+    --ink-2: #9ca1a9;
+    --muted: #6a6f78;
 
     /* lines & tracks */
-    --line: rgba(255, 255, 255, 0.1);
-    --line-2: rgba(255, 255, 255, 0.05);
-    --track: rgba(255, 255, 255, 0.09);
+    --line: rgba(255, 255, 255, 0.08);
+    --line-2: rgba(255, 255, 255, 0.045);
+    --track: rgba(255, 255, 255, 0.07);
 
     /* accent */
-    --acc: #22d3ee;
-    --acc-ink: #67e8f9;
-    --acc-soft: rgba(34, 211, 238, 0.16);
-    --acc-line: rgba(34, 211, 238, 0.46);
-    --focus-ring: 2px solid #22d3ee;
+    --acc: #38bdf8;
+    --acc-ink: #7dd3fc;
+    --acc-soft: rgba(56, 189, 248, 0.12);
+    --acc-line: rgba(56, 189, 248, 0.38);
+    --focus-ring: 2px solid #38bdf8;
 
     /* status */
     --good: #34d399;
     --warn: #fbbf24;
     --bad: #fb7185;
-    --good-soft: rgba(52, 211, 153, 0.15);
-    --warn-soft: rgba(251, 191, 36, 0.15);
-    --bad-soft: rgba(251, 113, 133, 0.15);
+    --good-soft: rgba(52, 211, 153, 0.14);
+    --warn-soft: rgba(251, 191, 36, 0.14);
+    --bad-soft: rgba(251, 113, 133, 0.14);
 
     /* categorical series */
-    --s1: #22d3ee;
-    --s2: #2dd4bf;
-    --s3: #fbbf24;
-    --s4: #34d399;
-    --s5: #818cf8;
-    --s6: #fb7185;
-    --s7: #e879f9;
-    --s8: #38bdf8;
+    --s1: #38bdf8;
+    --s2: #818cf8;
+    --s3: #2dd4bf;
+    --s4: #fbbf24;
+    --s5: #f472b6;
+    --s6: #a78bfa;
+    --s7: #34d399;
+    --s8: #fb7185;
 
     /* gradient & shadows */
-    --grad: linear-gradient(135deg, #22d3ee, #2dd4bf);
-    --sh-1: 0 2px 10px rgba(0, 0, 0, 0.34);
-    --sh-2: 0 12px 44px rgba(0, 6, 12, 0.45);
-    --sh-pop: 0 26px 64px rgba(0, 6, 12, 0.6);
+    --grad: linear-gradient(135deg, #38bdf8, #818cf8);
+    --sh-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --sh-2: 0 10px 34px rgba(0, 0, 0, 0.4);
+    --sh-pop: 0 24px 60px rgba(0, 0, 0, 0.55);
 
     /* shape */
-    --radius: 18px;
-    --blur: 20px;
+    --radius: 12px;
+    --blur: 0px;
 
     /* background layers */
-    --mesh:
-        radial-gradient(1000px 760px at 10% 4%, rgba(34, 211, 238, 0.34), transparent 56%), radial-gradient(1100px 820px at 92% 2%, rgba(129, 140, 248, 0.3), transparent 55%),
-        radial-gradient(1000px 900px at 82% 98%, rgba(45, 212, 191, 0.28), transparent 55%), radial-gradient(900px 760px at 4% 98%, rgba(232, 121, 249, 0.2), transparent 55%);
+    --mesh: radial-gradient(1200px 700px at 50% -18%, rgba(56, 189, 248, 0.08), transparent 62%), radial-gradient(900px 600px at 100% 0%, rgba(129, 140, 248, 0.05), transparent 60%);
     --mesh-op: 1;
+    --vignette: rgba(0, 0, 0, 0.35);
     --pattern: radial-gradient(rgba(150, 240, 250, 0.1) 1px, transparent 1.6px);
     --pattern-size: 22px 22px;
-    --pattern-op: 0.55;
+    --pattern-op: 0;
 
     /* layout & density */
     --content-max: none;
@@ -114,50 +113,25 @@ body {
         color 0.4s ease;
 }
 
-/* premium animated aurora mesh — one GPU-composited fixed layer */
+/* a single quiet glow near the top — calm, static (no busy grid or drift) */
 body::before {
     content: '';
     position: fixed;
-    inset: -25%;
+    inset: 0;
     background: var(--mesh);
     opacity: var(--mesh-op, 1);
-    filter: blur(6px) saturate(1.4);
-    will-change: transform;
-    transform: translateZ(0);
-    animation: aurora-drift 30s ease-in-out infinite alternate;
     pointer-events: none;
     z-index: 0;
 }
-@keyframes aurora-drift {
-    0% {
-        transform: translate3d(-2%, -1%, 0) scale(1.05) rotate(0deg);
-    }
-    50% {
-        transform: translate3d(2.5%, 1.5%, 0) scale(1.16) rotate(2.5deg);
-    }
-    100% {
-        transform: translate3d(-1%, 2.5%, 0) scale(1.09) rotate(-2deg);
-    }
-}
 
-/* subtle 46px grid overlay (matches the reference dashboard) */
+/* gentle vignette for depth toward the edges (theme-aware; near-nil on light) */
 body::after {
     content: '';
     position: fixed;
     inset: 0;
-    background-image:
-        linear-gradient(var(--line-2) 1px, transparent 1px),
-        linear-gradient(90deg, var(--line-2) 1px, transparent 1px);
-    background-size: 46px 46px;
-    opacity: 0.6;
+    background: radial-gradient(130% 100% at 50% -10%, transparent 55%, var(--vignette, rgba(0, 0, 0, 0.35)));
     pointer-events: none;
     z-index: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    body::before {
-        animation: none;
-    }
 }
 
 :focus-visible {
@@ -195,14 +169,12 @@ button {
 .card {
     grid-column: span 12;
     background: var(--glass, var(--surface));
-    -webkit-backdrop-filter: blur(var(--blur, 20px)) saturate(150%);
-    backdrop-filter: blur(var(--blur, 20px)) saturate(150%);
     border: 1px solid var(--glass-brd, var(--line));
     border-radius: var(--radius);
     padding: var(--card-pad, 20px);
     box-shadow:
-        var(--sh-2, 0 12px 44px rgba(0, 6, 12, 0.45)),
-        inset 0 1px 0 var(--glass-sheen, rgba(255, 255, 255, 0.06));
+        var(--sh-1),
+        inset 0 1px 0 var(--glass-sheen, transparent);
     transition:
         border-color 0.3s ease,
         box-shadow 0.3s ease;

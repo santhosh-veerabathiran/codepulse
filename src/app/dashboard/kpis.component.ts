@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AnalyticsStore, Cell, format, formatDuration, formatCompact, percent, FiltersStore } from '../core';
-import { Delta, KpiCard, KpiSpec } from './types';
+import { AnalyticsStore, Cell, FiltersStore, format, formatCompact, formatDuration, percent } from '../core';
 import { CountUpDirective } from './count.up.directive';
+import { Delta, KpiCard, KpiSpec } from './types';
 
 @Component({
     selector: 'cp-kpis',
@@ -18,45 +18,57 @@ import { CountUpDirective } from './count.up.directive';
             <div class="kpis">
                 @for (k of cards(); track k.label; let i = $index) {
                     <div class="kpi" [style.--kc]="k.color" [style.--i]="i">
-                    <div class="k-top">
-                        <span class="k-ic">
-                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                @switch (k.icon) {
-                                    @case ('commits') {
-                                        <circle cx="12" cy="12" r="3.5" /><line x1="2" y1="12" x2="8.5" y2="12" /><line x1="15.5" y1="12" x2="22" y2="12" />
+                        <div class="k-top">
+                            <span class="k-ic">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    @switch (k.icon) {
+                                        @case ('commits') {
+                                            <circle cx="12" cy="12" r="3.5" />
+                                            <line x1="2" y1="12" x2="8.5" y2="12" />
+                                            <line x1="15.5" y1="12" x2="22" y2="12" />
+                                        }
+                                        @case ('code') {
+                                            <polyline points="16 18 22 12 16 6" />
+                                            <polyline points="8 6 2 12 8 18" />
+                                        }
+                                        @case ('merge') {
+                                            <circle cx="6" cy="6" r="3" />
+                                            <circle cx="6" cy="18" r="3" />
+                                            <circle cx="18" cy="6" r="3" />
+                                            <path d="M18 9a9 9 0 0 1-9 9" />
+                                            <path d="M6 9v6" />
+                                        }
+                                        @case ('review') {
+                                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                                            <circle cx="12" cy="12" r="2.5" />
+                                        }
+                                        @case ('days') {
+                                            <rect x="3" y="4" width="18" height="17" rx="2" />
+                                            <line x1="3" y1="9" x2="21" y2="9" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                        }
+                                        @case ('clock') {
+                                            <circle cx="12" cy="12" r="9" />
+                                            <polyline points="12 7 12 12 16 14" />
+                                        }
                                     }
-                                    @case ('code') {
-                                        <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
-                                    }
-                                    @case ('merge') {
-                                        <circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="6" r="3" /><path d="M18 9a9 9 0 0 1-9 9" /><path d="M6 9v6" />
-                                    }
-                                    @case ('review') {
-                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="2.5" />
-                                    }
-                                    @case ('days') {
-                                        <rect x="3" y="4" width="18" height="17" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="16" y1="2" x2="16" y2="6" />
-                                    }
-                                    @case ('clock') {
-                                        <circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 16 14" />
-                                    }
-                                }
+                                </svg>
+                            </span>
+                            <span class="k-l">{{ k.label }}</span>
+                            @if (k.delta) {
+                                <span class="pill" [class]="k.delta.cls">{{ k.delta.text }}</span>
+                            }
+                        </div>
+                        <span class="k-v" [cpCountUp]="k.raw" [formatValue]="k.fmt"></span>
+                        <span class="k-s">{{ k.sub }}</span>
+                        @if (k.spark) {
+                            <svg class="k-spark" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+                                <polygon class="sp-area" [attr.points]="k.sparkArea" [attr.fill]="k.color" />
+                                <polyline class="sp-line" pathLength="1" [attr.points]="k.spark" fill="none" [attr.stroke]="k.color" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
                             </svg>
-                        </span>
-                        <span class="k-l">{{ k.label }}</span>
-                        @if (k.delta) {
-                            <span class="pill" [class]="k.delta.cls">{{ k.delta.text }}</span>
                         }
                     </div>
-                    <span class="k-v" [cpCountUp]="k.raw" [formatValue]="k.fmt"></span>
-                    <span class="k-s">{{ k.sub }}</span>
-                    @if (k.spark) {
-                        <svg class="k-spark" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
-                            <polygon class="sp-area" [attr.points]="k.sparkArea" [attr.fill]="k.color" />
-                            <polyline class="sp-line" pathLength="1" [attr.points]="k.spark" fill="none" [attr.stroke]="k.color" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
-                        </svg>
-                    }
-                </div>
                 }
             </div>
         }
@@ -205,15 +217,9 @@ export class KpisComponent {
         return this.analytics.personName(this.filters.personId());
     });
 
-    // Re-key the tiles when their values change so the pop + sparkline-draw
-    // entrance animations replay on person / filter changes, not only on load.
-    protected readonly renderKey = computed<string>(() => {
-        return this.cards()
-            .map((card) => {
-                return card.raw;
-            })
-            .join(',');
-    });
+    // Re-key the tiles on any view change (person, period, timeline granularity, …)
+    // so the pop + sparkline-draw entrance animations replay, not only on load.
+    protected readonly renderKey = this.filters.viewKey;
 
     protected readonly subline = computed<string>(() => {
         const c = this.analytics.selectedCell();
@@ -234,12 +240,12 @@ export class KpisComponent {
                 return x + y;
             }, 0) || 1;
         const specs: KpiSpec[] = [
-            { label: 'Commits', raw: c.commits, fmt: format, sub: `${formatCompact(c.additions + c.deletions)} lines`, color: 'var(--s1)', icon: 'commits', idx: 0 },
-            { label: 'Code lines', raw: c.categories['code'] || 0, fmt: formatCompact, sub: `${percent(c.categories['code'] || 0, catTot).toFixed(0)}% of changes`, color: 'var(--s2)', icon: 'code', idx: 2 },
-            { label: 'MRs merged', raw: c.mergeRequests.merged, fmt: format, sub: `${c.mergeRequests.rate ?? '—'}% merge rate`, color: 'var(--s3)', icon: 'merge', idx: 4 },
-            { label: 'Reviews', raw: c.mergeRequests.reviewed, fmt: format, sub: 'for others', color: 'var(--s5)', icon: 'review', idx: -1 },
-            { label: 'Active days', raw: c.days, fmt: format, sub: `${(c.days ? c.commits / c.days : 0).toFixed(1)} commits/day`, color: 'var(--s7)', icon: 'days', idx: -1 },
-            { label: 'Median merge', raw: c.mergeRequests.timeToMerge ?? 0, fmt: formatDuration, sub: 'time to merge', color: 'var(--s8)', icon: 'clock', idx: -1 },
+            { label: 'Commits', raw: c.commits, fmt: format, sub: `${formatCompact(c.additions + c.deletions)} lines`, color: 'var(--acc)', icon: 'commits', idx: 0 },
+            { label: 'Code lines', raw: c.categories['code'] || 0, fmt: formatCompact, sub: `${percent(c.categories['code'] || 0, catTot).toFixed(0)}% of changes`, color: 'var(--acc)', icon: 'code', idx: 2 },
+            { label: 'MRs merged', raw: c.mergeRequests.merged, fmt: format, sub: `${c.mergeRequests.rate ?? '—'}% merge rate`, color: 'var(--acc)', icon: 'merge', idx: 4 },
+            { label: 'Reviews', raw: c.mergeRequests.reviewed, fmt: format, sub: 'for others', color: 'var(--acc)', icon: 'review', idx: -1 },
+            { label: 'Active days', raw: c.days, fmt: format, sub: `${(c.days ? c.commits / c.days : 0).toFixed(1)} commits/day`, color: 'var(--acc)', icon: 'days', idx: -1 },
+            { label: 'Median merge', raw: c.mergeRequests.timeToMerge ?? 0, fmt: formatDuration, sub: 'time to merge', color: 'var(--acc)', icon: 'clock', idx: -1 },
         ];
         return specs.map((s) => {
             const series = s.idx >= 0 ? this.seriesFor(c, s.idx) : undefined;

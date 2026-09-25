@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { ThemeCharts, ThemeFile, ThemeOption } from '../types';
 import { DEFAULT_CHARTS, TOKEN_VARS } from '../constants/theme';
+import { ThemeCharts, ThemeFile, ThemeOption } from '../types';
 
 const STORAGE_KEY = 'codepulse.theme';
 const DEFAULT_SLUG = 'aurora';

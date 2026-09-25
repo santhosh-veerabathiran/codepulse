@@ -1,66 +1,55 @@
 {
     "schemaVersion": 1,
-    "name": "Paper",
+    "name": "Daylight",
     "mode": "light",
     "tokens": {
-        "app": "#eef0f6",
+        "app": "#f6f7f9",
         "surface": "#ffffff",
-        "surface2": "#f4f5fb",
+        "surface2": "#f1f2f5",
         "raise": "#ffffff",
-        "ink": "#131826",
-        "ink2": "#4a556b",
-        "muted": "#8892a6",
-        "line": "rgba(18,24,44,.11)",
-        "line2": "rgba(18,24,44,.055)",
-        "track": "rgba(18,24,44,.07)",
-        "accent": "#7c3aed",
-        "accentInk": "#6d28d9",
-        "accentSoft": "rgba(124,58,237,.10)",
-        "accentLine": "rgba(124,58,237,.32)",
-        "glass": "linear-gradient(150deg, rgba(255,255,255,0.76), rgba(255,255,255,0.60))",
-        "glassBorder": "rgba(255,255,255,.8)",
-        "glassSheen": "rgba(255,255,255,0.55)",
-        "series": [
-            "#7c3aed",
-            "#db2777",
-            "#d97706",
-            "#059669",
-            "#2563eb",
-            "#dc2626",
-            "#0891b2",
-            "#c026d3"
-        ],
-        "gradient": [
-            "#7c3aed",
-            "#db2777"
-        ],
-        "good": "#0ea371",
+        "ink": "#16181d",
+        "ink2": "#565d6b",
+        "muted": "#8b93a1",
+        "line": "rgba(16,20,30,.10)",
+        "line2": "rgba(16,20,30,.05)",
+        "track": "rgba(16,20,30,.07)",
+        "accent": "#0284c7",
+        "accentInk": "#0369a1",
+        "accentSoft": "rgba(2,132,199,.10)",
+        "accentLine": "rgba(2,132,199,.30)",
+        "glass": "#ffffff",
+        "glassBorder": "rgba(16,20,30,.10)",
+        "glassSheen": "transparent",
+        "series": ["#0284c7", "#6366f1", "#0d9488", "#d97706", "#db2777", "#7c3aed", "#059669", "#e11d48"],
+        "gradient": ["#0284c7", "#6366f1"],
+        "good": "#059669",
         "warn": "#d97706",
-        "bad": "#ef4657",
-        "shadow1": "0 1px 2px rgba(18,24,44,.05)",
-        "shadow2": "0 10px 34px rgba(18,24,44,.10)",
-        "radius": "8px",
+        "bad": "#e11d48",
+        "shadow1": "0 1px 2px rgba(16,24,40,.06)",
+        "shadow2": "0 10px 30px rgba(16,24,40,.10)",
+        "radius": "12px",
         "blur": "0px",
-        "mesh": "radial-gradient(1000px 760px at 12% 4%,rgba(124,58,237,.14),transparent 60%),radial-gradient(1000px 820px at 92% 2%,rgba(37,99,235,.1),transparent 60%),radial-gradient(900px 760px at 84% 98%,rgba(219,39,119,.1),transparent 60%)",
-        "meshOpacity": 0.8,
-        "accentItalic": "italic"
+        "mesh": "radial-gradient(1200px 700px at 50% -18%, rgba(2,132,199,.06), transparent 62%), radial-gradient(900px 600px at 100% 0%, rgba(99,102,241,.04), transparent 60%)",
+        "meshOpacity": 1,
+        "vignette": "rgba(16,24,40,.05)",
+        "accentItalic": "normal"
     },
     "pattern": {
         "type": "dots",
-        "image": "radial-gradient(rgba(30,40,80,.07) 1px,transparent 1.5px)",
-        "size": "18px 18px",
-        "opacity": 0.5
+        "image": "radial-gradient(rgba(16,24,40,.06) 1px,transparent 1.5px)",
+        "size": "22px 22px",
+        "opacity": 0
     },
     "charts": {
-        "trend": "line",
+        "trend": "area",
         "composition": "donut",
-        "ranking": "list"
+        "ranking": "lollipop"
     },
     "density": "compact",
     "fonts": {
-        "sans": "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
-        "display": "'Iowan Old Style', Palatino, Georgia, serif",
-        "mono": "'Courier New', ui-monospace, monospace"
+        "sans": "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "display": "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "mono": "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
     },
-    "iconStroke": 1.5
+    "iconStroke": 1.6
 }
