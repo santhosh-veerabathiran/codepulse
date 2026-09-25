@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, ThemeStore, format, formatCompact } from '../core';
 import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
-import { ChartKind, DonutItem, MomentumRow } from './types';
+import { SERIES_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
+import { ChartKind, DonutItem, MomentumRow, RankBucketDim, RankMetric } from './types';
 
 @Component({
     selector: 'cp-momentum',
@@ -14,7 +15,7 @@ import { ShareDonutComponent } from './share.donut.component';
             <div>
                 <p class="eyebrow">Momentum</p>
                 <h2>{{ name() }} — year over year</h2>
-                <p class="sub">Commits per year with the change against the year before — the shape of the trajectory.</p>
+                <p class="sub">{{ rankDim().label }} per year with the change against the year before — the shape of the trajectory.</p>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>
@@ -27,18 +28,20 @@ import { ShareDonutComponent } from './share.donut.component';
         } @else {
             <div class="card block">
                 @for (pass of [renderKey()]; track pass) {
-                @for (r of rows(); track r.year) {
-                    <div class="row" [title]="r.year + ' — ' + r.value + ' commits · ' + r.lines + ' lines'">
-                        <span class="yr mono">{{ r.year }}</span>
-                        <div class="track" [class.lolli]="kind() === Kind.Dots"><i [style.width.%]="r.percent"></i></div>
-                        <span class="rv">{{ r.value }}<em>{{ r.lines }}</em></span>
-                        @if (r.delta) {
-                            <span class="pill" [class]="r.delta.cls">{{ r.delta.text }}</span>
-                        } @else {
-                            <span class="pill flat">—</span>
-                        }
-                    </div>
-                }
+                    @for (r of rows(); track r.year) {
+                        <div class="row" [title]="r.year + ' — ' + r.value + ' ' + rankDim().label + ' · ' + r.sub">
+                            <span class="yr mono">{{ r.year }}</span>
+                            <div class="track" [class.lolli]="kind() === Kind.Dots"><i [style.width.%]="r.percent"></i></div>
+                            <span class="rv"
+                                >{{ r.value }}<em>{{ r.sub }}</em></span
+                            >
+                            @if (r.delta) {
+                                <span class="pill" [class]="r.delta.cls">{{ r.delta.text }}</span>
+                            } @else {
+                                <span class="pill flat">—</span>
+                            }
+                        </div>
+                    }
                 }
             </div>
         }
@@ -185,16 +188,16 @@ export class MomentumComponent {
         this.userKind.set(kind);
     }
 
+    protected readonly rankDim = computed<RankBucketDim>(() => {
+        return resolveDim(this.filters.sortKey(), SERIES_DIMS);
+    });
+
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });
 
     protected readonly renderKey = computed<string>(() => {
-        return `${this.kind()}:${this.rows()
-            .map((row) => {
-                return row.value;
-            })
-            .join(',')}`;
+        return `${this.filters.viewKey()}:${this.kind()}`;
     });
 
     protected readonly donutItems = computed<DonutItem[]>(() => {
@@ -202,11 +205,12 @@ export class MomentumComponent {
         if (!cell) {
             return [];
         }
+        const dim = this.rankDim();
         return Object.keys(cell.year)
             .sort()
             .map((year, index) => {
-                const commits = cell.year[year][0];
-                return { label: year, value: commits, color: `var(--s${(index % 8) + 1})`, display: format(commits) };
+                const value = dim.value(cell.year[year]);
+                return { label: year, value, color: `var(--s${(index % 8) + 1})`, display: dim.format(value) };
             });
     });
 
@@ -215,14 +219,19 @@ export class MomentumComponent {
         if (!cell) {
             return [];
         }
+        const dim = this.rankDim();
         const years = Object.keys(cell.year).sort();
-        const max = Math.max(1, ...years.map((y) => {
-            return cell.year[y][0];
-        }));
+        const max = Math.max(
+            1,
+            ...years.map((y) => {
+                return dim.value(cell.year[y]);
+            }),
+        );
         return years.map((year, i) => {
-            const commits = cell.year[year][0];
-            const prev = i > 0 ? cell.year[years[i - 1]][0] : 0;
-            return { year, value: format(commits), lines: `${formatCompact(cell.year[year][1])} lines`, percent: (commits / max) * 100, delta: this.deltaOf(commits, prev) };
+            const value = dim.value(cell.year[year]);
+            const prev = i > 0 ? dim.value(cell.year[years[i - 1]]) : 0;
+            const sub = dim.metric === RankMetric.Commits ? `${formatCompact(cell.year[year][1])} lines` : `${format(cell.year[year][0])} commits`;
+            return { year, value: dim.format(value), sub, percent: (value / max) * 100, delta: this.deltaOf(value, prev) };
         });
     });
 

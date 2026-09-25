@@ -1,6 +1,6 @@
 export interface TypeRow {
     label: string;
-    count: number;
+    metric: number;
     percent: number;
     detail: string;
 }

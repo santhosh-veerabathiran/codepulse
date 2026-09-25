@@ -37,13 +37,25 @@ export const mapRankKind = (name: string): ChartKind => {
                                 <polyline points="1,9 4,9 4,5 8,5 8,7 13,7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
                             }
                             @case (Kind.Bar) {
-                                <g fill="currentColor"><rect x="1" y="6" width="2.6" height="5" /><rect x="5.7" y="3" width="2.6" height="8" /><rect x="10.4" y="7" width="2.6" height="4" /></g>
+                                <g fill="currentColor">
+                                    <rect x="1" y="6" width="2.6" height="5" />
+                                    <rect x="5.7" y="3" width="2.6" height="8" />
+                                    <rect x="10.4" y="7" width="2.6" height="4" />
+                                </g>
                             }
                             @case (Kind.Column) {
-                                <g fill="currentColor"><rect x="1" y="6" width="2.6" height="5" /><rect x="5.7" y="3" width="2.6" height="8" /><rect x="10.4" y="7" width="2.6" height="4" /></g>
+                                <g fill="currentColor">
+                                    <rect x="1" y="6" width="2.6" height="5" />
+                                    <rect x="5.7" y="3" width="2.6" height="8" />
+                                    <rect x="10.4" y="7" width="2.6" height="4" />
+                                </g>
                             }
                             @case (Kind.Dots) {
-                                <g fill="currentColor"><circle cx="2" cy="9" r="1.5" /><circle cx="7" cy="5" r="1.5" /><circle cx="12" cy="7" r="1.5" /></g>
+                                <g fill="currentColor">
+                                    <circle cx="2" cy="9" r="1.5" />
+                                    <circle cx="7" cy="5" r="1.5" />
+                                    <circle cx="12" cy="7" r="1.5" />
+                                </g>
                             }
                             @case (Kind.Donut) {
                                 <circle cx="7" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="2.4" />

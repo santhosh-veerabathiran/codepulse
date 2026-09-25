@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, ThemeStore, format, formatCompact, percent } from '../core';
 import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
-import { ChartKind, DonutItem, ScopeRow, Tier, TypeRow } from './types';
+import { TYPE_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
+import { ChartKind, DonutItem, RankBucketDim, RankMetric, ScopeRow, Tier, TypeRow } from './types';
 
 @Component({
     selector: 'cp-work',
@@ -17,7 +18,7 @@ import { ShareDonutComponent } from './share.donut.component';
                 <div>
                     <p class="eyebrow">The shape of the work</p>
                     <h2>{{ name() }} — what kind of commits</h2>
-                    <p class="sub">Commits grouped by their conventional type, ranked by volume.</p>
+                    <p class="sub">Commit types by {{ rankDim().label }} in this view, ranked by volume.</p>
                 </div>
                 <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
             </div>
@@ -87,6 +88,7 @@ import { ShareDonutComponent } from './share.donut.component';
         }
         .head.second {
             margin-top: 22px;
+            display: block;
         }
         .eyebrow {
             font: 700 10px var(--font);
@@ -246,16 +248,17 @@ export class WorkComponent {
     });
 
     protected readonly renderKey = computed<string>(() => {
-        return `${this.kind()}:${this.types()
-            .map((row) => {
-                return row.percent;
-            })
-            .join(',')}:${this.tiers().length}`;
+        return `${this.filters.viewKey()}:${this.kind()}`;
+    });
+
+    protected readonly rankDim = computed<RankBucketDim>(() => {
+        return resolveDim(this.filters.sortKey(), TYPE_DIMS);
     });
 
     protected readonly typeDonut = computed<DonutItem[]>(() => {
+        const dim = this.rankDim();
         return this.types().map((row, index) => {
-            return { label: row.label, value: row.count, color: `var(--s${(index % 8) + 1})`, display: format(row.count) };
+            return { label: row.label, value: row.metric, color: `var(--s${(index % 8) + 1})`, display: dim.format(row.metric) };
         });
     });
 
@@ -264,21 +267,24 @@ export class WorkComponent {
         if (!c) {
             return [];
         }
+        const dim = this.rankDim();
         const entries = Object.entries(c.types).sort((a, b) => {
-            return b[1][0] - a[1][0];
+            return dim.value(b[1]) - dim.value(a[1]);
         });
         const max = Math.max(
             1,
             ...entries.map((e) => {
-                return e[1][0];
+                return dim.value(e[1]);
             }),
         );
         return entries.map(([label, v]) => {
+            const value = dim.value(v);
+            const detail = dim.metric === RankMetric.Commits ? `${format(v[0])} · ${formatCompact(v[1] || 0)} ln` : `${dim.format(value)} ${dim.label} · ${format(v[0])} commits`;
             return {
                 label,
-                count: v[0],
-                percent: (v[0] / max) * 100,
-                detail: `${format(v[0])} · ${formatCompact(v[1] || 0)} ln`,
+                metric: value,
+                percent: (value / max) * 100,
+                detail,
             };
         });
     });

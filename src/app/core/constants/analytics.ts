@@ -199,7 +199,6 @@ export const sortByKey = (key: string): SortDef => {
     );
 };
 
-
 const catTot = (c: Cell): number => {
     return (
         Object.values(c.categories).reduce((x, y) => {
@@ -269,10 +268,17 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 },
             },
             {
-                label: 'Merge commits',
+                label: 'Merges into main',
                 format: fCount,
                 value: (c) => {
-                    return c.merges.count;
+                    return c.merges.toMain;
+                },
+            },
+            {
+                label: 'Main → branch merges',
+                format: fCount,
+                value: (c) => {
+                    return c.merges.toBranch;
                 },
             },
             {
@@ -287,6 +293,13 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.authored;
+                },
+            },
+            {
+                label: 'MRs closed unmerged',
+                format: fCount,
+                value: (c) => {
+                    return c.mergeRequests.closed;
                 },
             },
             {
@@ -394,15 +407,20 @@ export const COMPARE_GROUPS: CompareGroup[] = [
             {
                 label: 'Median commit size',
                 format: fSize,
-                lower: true,
                 value: (c) => {
                     return c.sizes.median;
                 },
             },
             {
+                label: 'Mean commit size',
+                format: fSize,
+                value: (c) => {
+                    return c.sizes.mean;
+                },
+            },
+            {
                 label: 'P90 commit size',
                 format: fSize,
-                lower: true,
                 value: (c) => {
                     return c.sizes.p90;
                 },
@@ -414,7 +432,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                     return c.commits ? (c.categories['code'] || 0) / c.commits : 0;
                 },
             },
-            { label: 'Small commits ≤10 ln', format: fPct, value: smallShare },
+            { label: 'Small commits ≤10 ln', format: fPct, lower: true, value: smallShare },
         ],
     },
     {
@@ -442,6 +460,14 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.noteCount || 0;
+                },
+            },
+            {
+                label: 'Self-merge rate',
+                format: fPct,
+                lower: true,
+                value: (c) => {
+                    return c.mergeRequests.merged ? percent(c.mergeRequests.selfMerged, c.mergeRequests.merged) : 0;
                 },
             },
             {

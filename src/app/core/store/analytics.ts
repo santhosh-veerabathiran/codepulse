@@ -1,8 +1,14 @@
 import { Injectable, computed, inject } from '@angular/core';
-import { AF, ALL, Agg, BigCommit, Cell, F, Facts, MG, MR, MrState, OwnEntry, PersonId, RankRow } from '../types';
 import { sortByKey } from '../constants/analytics';
+import { AF, ALL, Agg, BigCommit, Cell, F, MG, MR, MrState, OwnEntry, PersonId, RankRow } from '../types';
 import { FactsStore } from './facts';
 import { FiltersStore } from './filters';
+
+// [commits, lines, code, mergesToMain, mergesToBranch, mrsMerged, mrsClosed,
+//  mrsOpened, reviews, activeDays, net, comment] — one row per year / repo / trend bucket.
+const newBucket = (): number[] => {
+    return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+};
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsStore {
@@ -78,6 +84,9 @@ export class AnalyticsStore {
         const sizes: number[] = [];
         const bigList: BigCommit[] = [];
         const days = new Set<string>();
+        const dYear: Record<string, Set<string>> = {};
+        const dRepo: Record<string, Set<string>> = {};
+        const dSeries: Record<string, Set<string>> = {};
         let min = '';
         let max = '';
 
@@ -106,11 +115,16 @@ export class AnalyticsStore {
             if (!max || date > max) {
                 max = date;
             }
+            const net = row[F.Add] - row[F.Del];
+            const cmt = row[F.CmtAdd];
             const y = date.slice(0, 4);
             const mo = date.slice(0, 7);
-            (cell.year[y] = cell.year[y] || [0, 0, 0])[0]++;
+            (cell.year[y] = cell.year[y] || newBucket())[0]++;
             cell.year[y][1] += ln;
             cell.year[y][2] += row[F.Code];
+            cell.year[y][10] += net;
+            cell.year[y][11] += cmt;
+            (dYear[y] = dYear[y] || new Set()).add(date);
             (cell.month[mo] = cell.month[mo] || [0, 0, 0])[0]++;
             cell.month[mo][1] += ln;
             cell.month[mo][2] += row[F.Code];
@@ -136,13 +150,19 @@ export class AnalyticsStore {
                 });
             }
             const rp = facts.repos[row[F.Repo]];
-            (cell.byrepo[rp] = cell.byrepo[rp] || [0, 0, 0, 0])[0]++;
+            (cell.byrepo[rp] = cell.byrepo[rp] || newBucket())[0]++;
             cell.byrepo[rp][1] += ln;
             cell.byrepo[rp][2] += row[F.Code];
+            cell.byrepo[rp][10] += net;
+            cell.byrepo[rp][11] += cmt;
+            (dRepo[rp] = dRepo[rp] || new Set()).add(date);
             const bk = f.bucketKey(date);
-            (series[bk] = series[bk] || [0, 0, 0, 0, 0])[0]++;
+            (series[bk] = series[bk] || newBucket())[0]++;
             series[bk][1] += ln;
             series[bk][2] += row[F.Code];
+            series[bk][10] += net;
+            series[bk][11] += cmt;
+            (dSeries[bk] = dSeries[bk] || new Set()).add(date);
         }
 
         for (const g of facts.MG) {
@@ -150,13 +170,16 @@ export class AnalyticsStore {
                 continue;
             }
             cell.merges.count++;
-            if ((g[MG.Kind] || 0) === 1) {
+            const mergeSlot = (g[MG.Kind] || 0) === 1 ? 4 : 3;
+            if (mergeSlot === 4) {
                 cell.merges.toBranch++;
             } else {
                 cell.merges.toMain++;
             }
             const bk = f.bucketKey(g[MG.Date]);
-            (series[bk] = series[bk] || [0, 0, 0, 0, 0])[3]++;
+            (series[bk] = series[bk] || newBucket())[mergeSlot]++;
+            (cell.year[g[MG.Date].slice(0, 4)] = cell.year[g[MG.Date].slice(0, 4)] || newBucket())[mergeSlot]++;
+            (cell.byrepo[facts.repos[g[MG.Repo]]] = cell.byrepo[facts.repos[g[MG.Repo]]] || newBucket())[mergeSlot]++;
         }
 
         for (const m of facts.MR) {
@@ -169,11 +192,19 @@ export class AnalyticsStore {
             const merger = m[MR.Merger];
             if (state === MrState.Merged && f.inScope(created) && (pAll || merger === P)) {
                 cell.mergeRequests.reviewed++;
+                const rbk = f.bucketKey(created);
+                (series[rbk] = series[rbk] || newBucket())[8]++;
+                (cell.year[created.slice(0, 4)] = cell.year[created.slice(0, 4)] || newBucket())[8]++;
+                (cell.byrepo[facts.repos[m[MR.Repo]]] = cell.byrepo[facts.repos[m[MR.Repo]]] || newBucket())[8]++;
             }
             if (!(pAll || author === P) || !f.inScope(created)) {
                 continue;
             }
             cell.mergeRequests.authored++;
+            const abk = f.bucketKey(created);
+            (series[abk] = series[abk] || newBucket())[7]++;
+            (cell.year[created.slice(0, 4)] = cell.year[created.slice(0, 4)] || newBucket())[7]++;
+            (cell.byrepo[facts.repos[m[MR.Repo]]] = cell.byrepo[facts.repos[m[MR.Repo]]] || newBucket())[7]++;
             cell.mergeRequests.upvotes += m[MR.Up];
             cell.mergeRequests.noteCountList.push(m[MR.Notes]);
             const yr = (cell.mrYear[created.slice(0, 4)] = cell.mrYear[created.slice(0, 4)] || [0, 0, 0]);
@@ -187,10 +218,16 @@ export class AnalyticsStore {
                     cell.mergeRequests.timeToMergeList.push(m[MR.Ttm]);
                 }
                 const bk = f.bucketKey(created);
-                (series[bk] = series[bk] || [0, 0, 0, 0, 0])[4]++;
+                (series[bk] = series[bk] || newBucket())[5]++;
+                (cell.year[created.slice(0, 4)] = cell.year[created.slice(0, 4)] || newBucket())[5]++;
+                (cell.byrepo[facts.repos[m[MR.Repo]]] = cell.byrepo[facts.repos[m[MR.Repo]]] || newBucket())[5]++;
             } else if (state === MrState.Closed) {
                 cell.mergeRequests.closed++;
                 yr[1]++;
+                const bk = f.bucketKey(created);
+                (series[bk] = series[bk] || newBucket())[6]++;
+                (cell.year[created.slice(0, 4)] = cell.year[created.slice(0, 4)] || newBucket())[6]++;
+                (cell.byrepo[facts.repos[m[MR.Repo]]] = cell.byrepo[facts.repos[m[MR.Repo]]] || newBucket())[6]++;
             } else if (state === MrState.Opened) {
                 cell.mergeRequests.open++;
                 yr[2]++;
@@ -199,6 +236,15 @@ export class AnalyticsStore {
 
         if (!cell.commits && !cell.merges.count && !cell.mergeRequests.authored && !cell.mergeRequests.reviewed) {
             return null;
+        }
+        for (const [key, set] of Object.entries(dYear)) {
+            cell.year[key][9] = set.size;
+        }
+        for (const [key, set] of Object.entries(dRepo)) {
+            cell.byrepo[key][9] = set.size;
+        }
+        for (const [key, set] of Object.entries(dSeries)) {
+            series[key][9] = set.size;
         }
         cell.range = [min, max];
         cell.days = days.size;

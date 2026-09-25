@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { AnalyticsStore, ThemeStore, FiltersStore, LINE_LABEL, LineCat, PeriodKind, format } from '../core';
+import { AnalyticsStore, FiltersStore, LINE_LABEL, LineCat, PeriodKind, ThemeStore } from '../core';
 import { ChartToggleComponent, mapTrendKind } from './chart.toggle.component';
-import { ChartKind, ChartPoint, ChartTip, SelectOption, TrendBar, TrendChart, TrendMetric } from './types';
 import { ChartTipComponent } from './chart.tooltip.component';
+import { SERIES_DIMS, TREND_LAYOUT, resolveDim } from './constants';
 import { SelectComponent } from './select.component';
-import { DEFAULT_TREND_METRIC, TREND_LAYOUT, TREND_METRIC } from './constants';
+import { ChartKind, ChartPoint, ChartTip, RankBucketDim, SelectOption, TrendBar, TrendChart } from './types';
 
 const { w: W, h: H, ml: ML, mr: MR, mt: MT, mb: MB } = TREND_LAYOUT;
 const PW = W - ML - MR;
@@ -19,7 +19,7 @@ const PH = H - MT - MB;
         <div class="t-head">
             <div>
                 <p class="eyebrow">Trend</p>
-                <h2>{{ metric().label }} by {{ gran() }}</h2>
+                <h2>{{ metricLabel() }} by {{ gran() }}</h2>
                 <p class="sub">{{ sub() }}</p>
             </div>
             <div class="t-ctrls">
@@ -33,45 +33,45 @@ const PH = H - MT - MB;
                     <p class="empty">Not enough activity to chart.</p>
                 } @else {
                     @for (pass of [renderKey()]; track pass) {
-                    <div class="chart-wrap">
-                    <svg viewBox="0 0 900 280" preserveAspectRatio="none" class="chart" role="img" aria-label="Activity trend" (mouseleave)="active.set(-1)">
-                        @for (t of c.yTicks; track t.label) {
-                            <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
-                            <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y + 3" text-anchor="end">{{ t.label }}</text>
-                        }
-                        @if (kind() === Kind.Area) {
-                            <polygon [attr.points]="c.area" class="area" />
-                            <polyline pathLength="1" [attr.points]="c.line" class="line" />
-                        }
-                        @if (kind() === Kind.Line) {
-                            <polyline pathLength="1" [attr.points]="c.line" class="line" />
-                        }
-                        @if (kind() === Kind.Step) {
-                            <polyline pathLength="1" [attr.points]="c.step" class="line" />
-                        }
-                        @if (kind() === Kind.Bar) {
-                            @for (b of c.bars; track $index) {
-                                <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" class="barfill" rx="1.5" />
-                            }
-                        }
-                        @if (kind() === Kind.Dots || kind() === Kind.Line || kind() === Kind.Area) {
-                            @for (d of c.dots; track $index) {
-                                <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot" />
-                            }
-                        }
-                        @for (t of c.xTicks; track t.label) {
-                            <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
-                        }
-                        @if (active() >= 0 && c.points[active()]; as p) {
-                            <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
-                            <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
-                        }
-                        @for (p of c.points; track $index; let i = $index) {
-                            <rect class="hit" [class.drillable]="drillable(p.label)" [attr.x]="p.x - bandWidth() / 2" [attr.y]="mt" [attr.width]="bandWidth()" [attr.height]="ph" (mouseenter)="active.set(i)" (click)="drill(p.label)" />
-                        }
-                    </svg>
-                    <cp-chart-tip [tip]="tip()" />
-                    </div>
+                        <div class="chart-wrap">
+                            <svg viewBox="0 0 900 280" preserveAspectRatio="none" class="chart" role="img" aria-label="Activity trend" (mouseleave)="active.set(-1)">
+                                @for (t of c.yTicks; track t.label) {
+                                    <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
+                                    <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y + 3" text-anchor="end">{{ t.label }}</text>
+                                }
+                                @if (kind() === Kind.Area) {
+                                    <polygon [attr.points]="c.area" class="area" />
+                                    <polyline pathLength="1" [attr.points]="c.line" class="line" />
+                                }
+                                @if (kind() === Kind.Line) {
+                                    <polyline pathLength="1" [attr.points]="c.line" class="line" />
+                                }
+                                @if (kind() === Kind.Step) {
+                                    <polyline pathLength="1" [attr.points]="c.step" class="line" />
+                                }
+                                @if (kind() === Kind.Bar) {
+                                    @for (b of c.bars; track $index) {
+                                        <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" class="barfill" rx="1.5" />
+                                    }
+                                }
+                                @if (kind() === Kind.Dots || kind() === Kind.Line || kind() === Kind.Area) {
+                                    @for (d of c.dots; track $index) {
+                                        <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot" />
+                                    }
+                                }
+                                @for (t of c.xTicks; track t.label) {
+                                    <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
+                                }
+                                @if (active() >= 0 && c.points[active()]; as p) {
+                                    <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
+                                    <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
+                                }
+                                @for (p of c.points; track $index; let i = $index) {
+                                    <rect class="hit" [class.drillable]="drillable(p.label)" [attr.x]="p.x - bandWidth() / 2" [attr.y]="mt" [attr.width]="bandWidth()" [attr.height]="ph" (mouseenter)="active.set(i)" (click)="drill(p.label)" />
+                                }
+                            </svg>
+                            <cp-chart-tip [tip]="tip()" />
+                        </div>
                     }
                 }
             }
@@ -207,15 +207,18 @@ export class TrendComponent {
         return this.analytics.selectedCell()?.series.gran || 'period';
     });
 
-    protected readonly metric = computed<TrendMetric>(() => {
-        return TREND_METRIC[this.filters.sortKey()] ?? DEFAULT_TREND_METRIC;
+    protected readonly metric = computed<RankBucketDim>(() => {
+        return resolveDim(this.filters.sortKey(), SERIES_DIMS);
+    });
+    protected readonly metricLabel = computed<string>(() => {
+        const label = this.metric().label;
+        return label.charAt(0).toUpperCase() + label.slice(1);
     });
 
-    // Changes whenever the plotted data changes, so the chart re-creates and its
-    // entrance animation replays on person / filter / metric changes (not just load).
+    // Changes on any view change or chart-style change, so the chart re-creates and
+    // its entrance animation replays (not just on load).
     protected readonly renderKey = computed<string>(() => {
-        const chart = this.chart();
-        return `${this.kind()}:${chart.points.map((p) => p.value).join(',')}`;
+        return `${this.filters.viewKey()}:${this.kind()}`;
     });
 
     protected readonly lineCat = this.filters.lineCat;
@@ -236,10 +239,10 @@ export class TrendComponent {
         }
         const m = this.metric();
         const total = c.series.keys.reduce((sum, k) => {
-            return sum + c.series.data[k][m.index];
+            return sum + m.value(c.series.data[k]);
         }, 0);
         const n = c.series.keys.length;
-        return `${n} ${c.series.gran}${n === 1 ? '' : 's'} · ${format(total)} ${m.label.toLowerCase()}`;
+        return `${n} ${c.series.gran}${n === 1 ? '' : 's'} · ${m.format(total)} ${m.label}`;
     });
 
     protected readonly chart = computed<TrendChart>(() => {
@@ -248,9 +251,9 @@ export class TrendComponent {
         if (keys.length < 2) {
             return { empty: true, line: '', area: '', step: '', bars: [], yTicks: [], xTicks: [], dots: [], points: [] };
         }
-        const idx = this.metric().index;
+        const dim = this.metric();
         const vals = keys.map((k) => {
-            return cell!.series.data[k][idx];
+            return dim.value(cell!.series.data[k]);
         });
         const max = Math.max(1, ...vals);
         const n = keys.length;
@@ -264,7 +267,7 @@ export class TrendComponent {
             return { x: +xOf(i).toFixed(1), y: +yOf(v).toFixed(1) };
         });
         const points: ChartPoint[] = vals.map((v, i) => {
-            return { x: dots[i].x, y: dots[i].y, label: keys[i], value: format(v) };
+            return { x: dots[i].x, y: dots[i].y, label: keys[i], value: dim.format(v) };
         });
         const line = dots
             .map((d) => {
@@ -280,13 +283,15 @@ export class TrendComponent {
             stepPts.push(`${d.x},${d.y}`);
         });
         const step = stepPts.join(' ');
-        const bw = n > 1 ? (PW / n) * 0.7 : PW * 0.5;
+        const band = PW / n;
+        const bw = band * 0.7;
         const bars: TrendBar[] = vals.map((v, i) => {
             const y = yOf(v);
-            return { x: +(xOf(i) - bw / 2).toFixed(1), y: +y.toFixed(1), w: +bw.toFixed(1), h: +(MT + PH - y).toFixed(1) };
+            const center = ML + (i + 0.5) * band;
+            return { x: +(center - bw / 2).toFixed(1), y: +y.toFixed(1), w: +bw.toFixed(1), h: +(MT + PH - y).toFixed(1) };
         });
         const yTicks = [0, 1, 2, 3].map((i) => {
-            return { y: +(MT + PH - (PH * i) / 3).toFixed(1), label: format((max * i) / 3) };
+            return { y: +(MT + PH - (PH * i) / 3).toFixed(1), label: dim.format((max * i) / 3) };
         });
         const gran = cell!.series.gran;
         const tickStep = Math.max(1, Math.ceil(n / 8));
@@ -310,27 +315,24 @@ export class TrendComponent {
         if (!data) {
             return undefined;
         }
-        const activeIndex = this.metric().index;
-        const metrics = [
-            { index: 0, label: 'Commits', color: 'var(--s1)' },
-            { index: 1, label: 'Lines changed', color: 'var(--s2)' },
-            { index: 2, label: 'Code lines', color: 'var(--s3)' },
-            { index: 3, label: 'Merges', color: 'var(--s4)' },
-            { index: 4, label: 'MRs merged', color: 'var(--s5)' },
-        ];
-        const ordered = metrics.filter((m) => {
-            return m.index === activeIndex;
+        const active = this.metric();
+        const counts = SERIES_DIMS.filter((d) => {
+            return !d.derived;
         });
-        for (const m of metrics) {
-            if (m.index !== activeIndex) {
-                ordered.push(m);
-            }
-        }
+        const ordered = active.derived
+            ? [active, ...counts]
+            : [
+                  active,
+                  ...counts.filter((d) => {
+                      return d.metric !== active.metric;
+                  }),
+              ];
         return {
             xPct: (p.x / 900) * 100,
             title: p.label,
-            rows: ordered.map((m) => {
-                return { label: m.label, value: format(data[m.index]), color: m.color, active: m.index === activeIndex };
+            rows: ordered.map((d, i) => {
+                const label = d.label.charAt(0).toUpperCase() + d.label.slice(1);
+                return { label, value: d.format(d.value(data)), color: `var(--s${(i % 8) + 1})`, active: d.metric === active.metric };
             }),
         };
     });

@@ -1,10 +1,5 @@
 import { ChartPoint } from './chart';
 
-export interface TrendMetric {
-    index: number;
-    label: string;
-}
-
 export interface TrendBar {
     x: number;
     y: number;

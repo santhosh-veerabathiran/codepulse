@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FactsStore, FiltersStore, ThemeStore, format, formatCompact } from '../core';
 import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
-import { ChartKind, DonutItem, RepoRow } from './types';
+import { SERIES_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
+import { ChartKind, DonutItem, RankBucketDim, RankMetric, RepoRow } from './types';
 
 @Component({
     selector: 'cp-repos',
@@ -14,7 +15,7 @@ import { ShareDonutComponent } from './share.donut.component';
             <div>
                 <p class="eyebrow">Where it landed</p>
                 <h2>{{ name() }} — by repository</h2>
-                <p class="sub">Commits per repository in this view, ranked by volume. Front-end and back-end are coloured apart.</p>
+                <p class="sub">Each repository's {{ rankDim().label }} in this view, ranked by volume. Front-end and back-end are coloured apart.</p>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>
@@ -28,10 +29,12 @@ import { ShareDonutComponent } from './share.donut.component';
             <div class="card block">
                 @for (pass of [renderKey()]; track pass) {
                     @for (r of rows(); track r.name) {
-                        <div class="row" [title]="r.name + ' — ' + r.value + ' commits · ' + r.lines + ' lines'">
+                        <div class="row" [title]="r.name + ' — ' + r.value + ' ' + rankDim().label + ' · ' + r.sub">
                             <span class="rn mono">{{ r.name }}</span>
                             <div class="track" [class.lolli]="kind() === Kind.Dots" [style.--bar]="color(r.group)"><i [style.width.%]="r.percent"></i></div>
-                            <span class="rv">{{ r.value }}<em>{{ r.lines }}</em></span>
+                            <span class="rv"
+                                >{{ r.value }}<em>{{ r.sub }}</em></span
+                            >
                         </div>
                     }
                 }
@@ -164,11 +167,15 @@ export class ReposComponent {
         this.userKind.set(kind);
     }
 
+    protected readonly rankDim = computed<RankBucketDim>(() => {
+        return resolveDim(this.filters.sortKey(), SERIES_DIMS);
+    });
+
     protected readonly donutItems = computed<DonutItem[]>(() => {
         return this.rows()
             .slice(0, 8)
             .map((row) => {
-                return { label: row.name, value: row.commits, color: this.color(row.group), display: row.value };
+                return { label: row.name, value: row.metric, color: this.color(row.group), display: row.value };
             });
     });
 
@@ -177,11 +184,7 @@ export class ReposComponent {
     });
 
     protected readonly renderKey = computed<string>(() => {
-        return `${this.kind()}:${this.rows()
-            .map((row) => {
-                return row.value;
-            })
-            .join(',')}`;
+        return `${this.filters.viewKey()}:${this.kind()}`;
     });
 
     protected readonly rows = computed<RepoRow[]>(() => {
@@ -190,16 +193,22 @@ export class ReposComponent {
             return [];
         }
         const groups = this.facts.facts()?.repoGroups ?? {};
+        const dim = this.rankDim();
         const entries = Object.entries(cell.byrepo);
-        const max = Math.max(1, ...entries.map(([, v]) => {
-            return v[0];
-        }));
+        const max = Math.max(
+            1,
+            ...entries.map(([, v]) => {
+                return dim.value(v);
+            }),
+        );
         return entries
             .map(([repo, v]) => {
-                return { name: repo, group: groups[repo] ?? 'Other', commits: v[0], value: format(v[0]), lines: `${formatCompact(v[1])} lines`, percent: (v[0] / max) * 100 };
+                const metric = dim.value(v);
+                const sub = dim.metric === RankMetric.Commits ? `${formatCompact(v[1])} lines` : `${format(v[0])} commits`;
+                return { name: repo, group: groups[repo] ?? 'Other', metric, value: dim.format(metric), sub, percent: (metric / max) * 100 };
             })
             .sort((a, b) => {
-                return b.commits - a.commits;
+                return b.metric - a.metric;
             });
     });
 

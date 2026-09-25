@@ -13,6 +13,7 @@ export * from './momentum';
 export * from './mr';
 export * from './pulse';
 export * from './quality';
+export * from './rank';
 export * from './repos';
 export * from './rhythm';
 export * from './select';

@@ -1,8 +1,8 @@
 export interface RepoRow {
     name: string;
     group: string;
-    commits: number;
+    metric: number;
     value: string;
-    lines: string;
+    sub: string;
     percent: number;
 }
