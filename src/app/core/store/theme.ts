@@ -1,9 +1,7 @@
 import { Injectable, signal } from '@angular/core';
+import { DEFAULT_THEME_SLUG, THEME_KEY } from '../constants';
 import { DEFAULT_CHARTS, TOKEN_VARS } from '../constants/theme';
 import { ThemeCharts, ThemeFile, ThemeOption } from '../types';
-
-const STORAGE_KEY = 'codepulse.theme';
-const DEFAULT_SLUG = 'aurora';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeStore {
@@ -92,15 +90,15 @@ export class ThemeStore {
 
     private readStored(): string {
         try {
-            return localStorage.getItem(STORAGE_KEY) ?? DEFAULT_SLUG;
+            return localStorage.getItem(THEME_KEY) ?? DEFAULT_THEME_SLUG;
         } catch {
-            return DEFAULT_SLUG;
+            return DEFAULT_THEME_SLUG;
         }
     }
 
     private persist(slug: string) {
         try {
-            localStorage.setItem(STORAGE_KEY, slug);
+            localStorage.setItem(THEME_KEY, slug);
         } catch {
             /* storage unavailable (private mode) */
         }

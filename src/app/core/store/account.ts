@@ -1,8 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { ACCOUNTS_KEY, ACTIVE_KEY } from '../constants';
 import { Account } from '../types';
-
-const ACCOUNTS_KEY = 'codepulse.accounts';
-const ACTIVE_KEY = 'codepulse.active';
 
 @Injectable({ providedIn: 'root' })
 export class AccountStore {
@@ -76,7 +74,7 @@ export class AccountStore {
         try {
             return localStorage.getItem(ACTIVE_KEY) ?? undefined;
         } catch {
-            return undefined;
+            return;
         }
     }
 }

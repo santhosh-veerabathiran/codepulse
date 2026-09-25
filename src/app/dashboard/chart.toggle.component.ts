@@ -1,22 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ChartKind } from './types';
 
-const TREND_MAP: Record<string, ChartKind> = { area: ChartKind.Area, line: ChartKind.Line, step: ChartKind.Step, bars: ChartKind.Bar, bar: ChartKind.Bar, dots: ChartKind.Dots };
-const COMP_MAP: Record<string, ChartKind> = { donut: ChartKind.Donut, column: ChartKind.Column, hbar: ChartKind.Bar, bar: ChartKind.Bar };
-const RANK_MAP: Record<string, ChartKind> = { lollipop: ChartKind.Dots, dot: ChartKind.Dots, dots: ChartKind.Dots, bar: ChartKind.Bar, column: ChartKind.Bar };
-
-export const mapTrendKind = (name: string): ChartKind => {
-    return TREND_MAP[name] ?? ChartKind.Area;
-};
-
-export const mapCompKind = (name: string): ChartKind => {
-    return COMP_MAP[name] ?? ChartKind.Donut;
-};
-
-export const mapRankKind = (name: string): ChartKind => {
-    return RANK_MAP[name] ?? ChartKind.Bar;
-};
-
 @Component({
     selector: 'cp-chart-toggle',
     standalone: true,
