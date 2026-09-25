@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AnalyticsStore, FiltersStore, format } from '../core';
-import { RecordCard } from './types';
 import { DAY, MONTHS } from './constants';
+import { ReplayDirective } from './replay.directive';
+import { RecordCard } from './types';
 
 @Component({
     selector: 'cp-rhythm',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Cadence</p>
@@ -14,7 +16,7 @@ import { DAY, MONTHS } from './constants';
             <p class="sub">Consistency and personal bests within the current repo &amp; period.</p>
         </div>
         @if (records(); as rs) {
-            <div class="records">
+            <div class="records" *cpReplay="viewKey()">
                 @for (r of rs; track r.label) {
                     <div class="rec" [style.--rc]="r.color">
                         <span class="r-l">{{ r.label }}</span>
@@ -93,6 +95,7 @@ export class RhythmComponent {
     private readonly analytics = inject(AnalyticsStore);
     private readonly filters = inject(FiltersStore);
 
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });

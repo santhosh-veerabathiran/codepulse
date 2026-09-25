@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AnalyticsStore, FiltersStore, format, formatDuration } from '../core';
+import { ReplayDirective } from './replay.directive';
 import { MrKpi, Seg, YearRow } from './types';
 
 @Component({
     selector: 'cp-mr',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Merge requests</p>
@@ -16,7 +18,7 @@ import { MrKpi, Seg, YearRow } from './types';
         @if (!cell(); as _n) {
             <p class="empty card">No merge requests in this view.</p>
         } @else {
-            <div class="kpis">
+            <div class="kpis" *cpReplay="viewKey()">
                 @for (k of kpis(); track k.label) {
                     <div class="kpi" [class.hot]="k.hot">
                         <span class="k-l">{{ k.label }}</span>
@@ -29,7 +31,7 @@ import { MrKpi, Seg, YearRow } from './types';
             </div>
 
             @if (states().length) {
-                <div class="card block">
+                <div class="card block" *cpReplay="viewKey()">
                     <p class="bh">Outcomes</p>
                     <div class="segbar">
                         @for (s of states(); track s.label) {
@@ -45,7 +47,7 @@ import { MrKpi, Seg, YearRow } from './types';
             }
 
             @if (years().length) {
-                <div class="card block">
+                <div class="card block" *cpReplay="viewKey()">
                     <p class="bh">MRs opened by year — merged · closed · open</p>
                     <div class="years">
                         @for (y of years(); track y.year) {
@@ -217,6 +219,7 @@ export class MrComponent {
     private readonly filters = inject(FiltersStore);
 
     protected readonly cell = this.analytics.selectedCell;
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });

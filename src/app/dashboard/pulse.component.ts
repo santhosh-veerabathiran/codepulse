@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { AnalyticsStore, Cell, ALL, format, formatDuration, formatCompact, percent, ThemeStore } from '../core';
+import { ALL, AnalyticsStore, Cell, FiltersStore, format, formatCompact, formatDuration, percent, ThemeStore } from '../core';
 import { ChartToggleComponent, mapTrendKind } from './chart.toggle.component';
-import { ChartKind, ChartPoint, ChartTip, PulseKpi, SeriesChart, Tick } from './types';
 import { ChartTipComponent } from './chart.tooltip.component';
 import { EMPTY_SERIES, PULSE_LAYOUT } from './constants';
+import { ReplayDirective } from './replay.directive';
+import { ChartKind, ChartPoint, ChartTip, PulseKpi, SeriesChart, Tick } from './types';
 
 const { w: W, h: H, ml: ML, mr: MR, mt: MT, mb: MB } = PULSE_LAYOUT;
 const PW = W - ML - MR;
@@ -13,7 +14,7 @@ const PH = H - MT - MB;
     selector: 'cp-pulse',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ChartToggleComponent, ChartTipComponent],
+    imports: [ChartToggleComponent, ChartTipComponent, ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Team pulse</p>
@@ -24,7 +25,7 @@ const PH = H - MT - MB;
         @if (!cell()) {
             <p class="empty card">No team activity in this view.</p>
         } @else {
-            <div class="kpis">
+            <div class="kpis" *cpReplay="viewKey()">
                 @for (k of kpis(); track k.label) {
                     <div class="kpi">
                         <span class="k-l">{{ k.label }}</span>
@@ -34,7 +35,7 @@ const PH = H - MT - MB;
             </div>
 
             <div class="grid">
-                <div class="card">
+                <div class="card" *cpReplay="viewKey()">
                     <div class="chead">
                         <p class="ch">Commits per {{ gran() }}</p>
                         <cp-chart-toggle [kinds]="commitsKinds" [value]="commitsKind()" (picked)="setCommitsKind($event)" />
@@ -44,51 +45,51 @@ const PH = H - MT - MB;
                             <p class="empty">Not enough data to chart.</p>
                         } @else {
                             @for (pass of [keyCommits()]; track pass) {
-                            <div class="chart-wrap">
-                            <svg viewBox="0 0 900 220" preserveAspectRatio="none" class="chart" role="img" aria-label="Commits per period" (mouseleave)="activeCommits.set(-1)">
-                                @for (t of a.yTicks; track t.label) {
-                                    <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
-                                    <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y! + 3" text-anchor="end">{{ t.label }}</text>
-                                }
-                                @if (commitsKind() === Kind.Area) {
-                                    <polygon [attr.points]="a.area" class="area" />
-                                    <polyline pathLength="1" [attr.points]="a.line" class="line" />
-                                }
-                                @if (commitsKind() === Kind.Line) {
-                                    <polyline pathLength="1" [attr.points]="a.line" class="line" />
-                                }
-                                @if (commitsKind() === Kind.Step) {
-                                    <polyline pathLength="1" [attr.points]="a.step" class="line" />
-                                }
-                                @if (commitsKind() === Kind.Bar) {
-                                    @for (b of a.bars; track $index) {
-                                        <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" class="barfill" rx="1.5" />
-                                    }
-                                }
-                                @if (commitsKind() === Kind.Dots || commitsKind() === Kind.Line || commitsKind() === Kind.Area) {
-                                    @for (d of a.dots; track $index) {
-                                        <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot" />
-                                    }
-                                }
-                                @for (t of a.xTicks; track t.label) {
-                                    <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
-                                }
-                                @if (activeCommits() >= 0 && a.points[activeCommits()]; as p) {
-                                    <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
-                                    <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
-                                }
-                                @for (p of a.points; track $index; let i = $index) {
-                                    <rect class="hit" [attr.x]="p.x - bandWidth(a.points) / 2" [attr.y]="mt" [attr.width]="bandWidth(a.points)" [attr.height]="ph" (mouseenter)="activeCommits.set(i)" />
-                                }
-                            </svg>
-                            <cp-chart-tip [tip]="tipCommits()" />
-                            </div>
+                                <div class="chart-wrap">
+                                    <svg viewBox="0 0 900 220" preserveAspectRatio="none" class="chart" role="img" aria-label="Commits per period" (mouseleave)="activeCommits.set(-1)">
+                                        @for (t of a.yTicks; track t.label) {
+                                            <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
+                                            <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y! + 3" text-anchor="end">{{ t.label }}</text>
+                                        }
+                                        @if (commitsKind() === Kind.Area) {
+                                            <polygon [attr.points]="a.area" class="area" />
+                                            <polyline pathLength="1" [attr.points]="a.line" class="line" />
+                                        }
+                                        @if (commitsKind() === Kind.Line) {
+                                            <polyline pathLength="1" [attr.points]="a.line" class="line" />
+                                        }
+                                        @if (commitsKind() === Kind.Step) {
+                                            <polyline pathLength="1" [attr.points]="a.step" class="line" />
+                                        }
+                                        @if (commitsKind() === Kind.Bar) {
+                                            @for (b of a.bars; track $index) {
+                                                <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" class="barfill" rx="1.5" />
+                                            }
+                                        }
+                                        @if (commitsKind() === Kind.Dots || commitsKind() === Kind.Line || commitsKind() === Kind.Area) {
+                                            @for (d of a.dots; track $index) {
+                                                <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot" />
+                                            }
+                                        }
+                                        @for (t of a.xTicks; track t.label) {
+                                            <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
+                                        }
+                                        @if (activeCommits() >= 0 && a.points[activeCommits()]; as p) {
+                                            <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
+                                            <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
+                                        }
+                                        @for (p of a.points; track $index; let i = $index) {
+                                            <rect class="hit" [attr.x]="p.x - bandWidth(a.points) / 2" [attr.y]="mt" [attr.width]="bandWidth(a.points)" [attr.height]="ph" (mouseenter)="activeCommits.set(i)" />
+                                        }
+                                    </svg>
+                                    <cp-chart-tip [tip]="tipCommits()" />
+                                </div>
                             }
                         }
                     }
                 </div>
 
-                <div class="card">
+                <div class="card" *cpReplay="viewKey()">
                     <div class="chead">
                         <p class="ch">MRs merged per {{ gran() }}</p>
                         <cp-chart-toggle [kinds]="mrsKinds" [value]="mrsKind()" (picked)="mrsKind.set($event)" />
@@ -98,40 +99,40 @@ const PH = H - MT - MB;
                             <p class="empty">Not enough data to chart.</p>
                         } @else {
                             @for (pass of [keyMerges()]; track pass) {
-                            <div class="chart-wrap">
-                            <svg viewBox="0 0 900 220" preserveAspectRatio="none" class="chart" role="img" aria-label="MRs merged per period" (mouseleave)="activeMerges.set(-1)">
-                                @for (t of b.yTicks; track t.label) {
-                                    <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
-                                    <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y! + 3" text-anchor="end">{{ t.label }}</text>
-                                }
-                                @if (mrsKind() === Kind.Bar) {
-                                    @for (bar of b.bars; track $index) {
-                                        <rect class="bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.w" [attr.height]="bar.h" rx="1.5" />
-                                    }
-                                }
-                                @if (mrsKind() === Kind.Area) {
-                                    <polygon [attr.points]="b.area" class="area-2" />
-                                    <polyline pathLength="1" [attr.points]="b.line" class="line-2" />
-                                }
-                                @if (mrsKind() === Kind.Line) {
-                                    <polyline pathLength="1" [attr.points]="b.line" class="line-2" />
-                                    @for (d of b.dots; track $index) {
-                                        <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot-2" />
-                                    }
-                                }
-                                @for (t of b.xTicks; track t.label) {
-                                    <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
-                                }
-                                @if (activeMerges() >= 0 && b.points[activeMerges()]; as p) {
-                                    <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
-                                    <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
-                                }
-                                @for (p of b.points; track $index; let i = $index) {
-                                    <rect class="hit" [attr.x]="p.x - bandWidth(b.points) / 2" [attr.y]="mt" [attr.width]="bandWidth(b.points)" [attr.height]="ph" (mouseenter)="activeMerges.set(i)" />
-                                }
-                            </svg>
-                            <cp-chart-tip [tip]="tipMerges()" />
-                            </div>
+                                <div class="chart-wrap">
+                                    <svg viewBox="0 0 900 220" preserveAspectRatio="none" class="chart" role="img" aria-label="MRs merged per period" (mouseleave)="activeMerges.set(-1)">
+                                        @for (t of b.yTicks; track t.label) {
+                                            <line class="grid" [attr.x1]="ml" [attr.y1]="t.y" [attr.x2]="w - mr" [attr.y2]="t.y" />
+                                            <text class="tick" [attr.x]="ml - 6" [attr.y]="t.y! + 3" text-anchor="end">{{ t.label }}</text>
+                                        }
+                                        @if (mrsKind() === Kind.Bar) {
+                                            @for (bar of b.bars; track $index) {
+                                                <rect class="bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.w" [attr.height]="bar.h" rx="1.5" />
+                                            }
+                                        }
+                                        @if (mrsKind() === Kind.Area) {
+                                            <polygon [attr.points]="b.area" class="area-2" />
+                                            <polyline pathLength="1" [attr.points]="b.line" class="line-2" />
+                                        }
+                                        @if (mrsKind() === Kind.Line) {
+                                            <polyline pathLength="1" [attr.points]="b.line" class="line-2" />
+                                            @for (d of b.dots; track $index) {
+                                                <circle [attr.cx]="d.x" [attr.cy]="d.y" r="2.6" class="dot-2" />
+                                            }
+                                        }
+                                        @for (t of b.xTicks; track t.label) {
+                                            <text class="tick" [attr.x]="t.x" [attr.y]="h - 8" text-anchor="middle">{{ t.label }}</text>
+                                        }
+                                        @if (activeMerges() >= 0 && b.points[activeMerges()]; as p) {
+                                            <line class="cross" [attr.x1]="p.x" [attr.y1]="mt" [attr.x2]="p.x" [attr.y2]="mt + ph" />
+                                            <circle class="hi" [attr.cx]="p.x" [attr.cy]="p.y" r="4" />
+                                        }
+                                        @for (p of b.points; track $index; let i = $index) {
+                                            <rect class="hit" [attr.x]="p.x - bandWidth(b.points) / 2" [attr.y]="mt" [attr.width]="bandWidth(b.points)" [attr.height]="ph" (mouseenter)="activeMerges.set(i)" />
+                                        }
+                                    </svg>
+                                    <cp-chart-tip [tip]="tipMerges()" />
+                                </div>
                             }
                         }
                     }
@@ -293,6 +294,8 @@ const PH = H - MT - MB;
 })
 export class PulseComponent {
     private readonly analytics = inject(AnalyticsStore);
+    private readonly filters = inject(FiltersStore);
+    protected readonly viewKey = this.filters.viewKey;
     private readonly theme = inject(ThemeStore);
 
     protected readonly w = W;
@@ -352,10 +355,14 @@ export class PulseComponent {
     });
 
     protected readonly keyCommits = computed<string>(() => {
-        return `${this.commitsKind()}:${this.commits().points.map((p) => p.value).join(',')}`;
+        return `${this.commitsKind()}:${this.commits()
+            .points.map((p) => p.value)
+            .join(',')}`;
     });
     protected readonly keyMerges = computed<string>(() => {
-        return `${this.mrsKind()}:${this.merges().points.map((p) => p.value).join(',')}`;
+        return `${this.mrsKind()}:${this.merges()
+            .points.map((p) => p.value)
+            .join(',')}`;
     });
 
     private buildTip(points: ChartPoint[], index: number, label: string): ChartTip | undefined {

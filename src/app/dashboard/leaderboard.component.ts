@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { AnalyticsStore, RankRow, sortByKey, ALL, PersonId, FiltersStore, ThemeStore } from '../core';
+import { ALL, AnalyticsStore, FiltersStore, PersonId, RankRow, sortByKey, ThemeStore } from '../core';
 import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
-import { ChartKind } from './types';
 import { LEADERBOARD_CAP } from './constants';
+import { ChartKind } from './types';
 
 @Component({
     selector: 'cp-leaderboard',
@@ -14,24 +14,26 @@ import { LEADERBOARD_CAP } from './constants';
             <div>
                 <p class="eyebrow">The team</p>
                 <h2>Ranked by {{ sortLabel() }}</h2>
-                <p class="sub">{{ expanded() ? 'All ' + rows().length : 'Top ' + cap + ' of ' + rows().length }} contributors — click anyone to open their view. Craft signals, not a performance ranking; line counts exclude generated / vendored files.</p>
+                <p class="sub">
+                    {{ expanded() ? 'All ' + rows().length : 'Top ' + cap + ' of ' + rows().length }} contributors — click anyone to open their view. Craft signals, not a performance ranking; line counts exclude generated / vendored files.
+                </p>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>
         <div class="lb card" [class.list]="listMode()">
             @for (pass of [renderKey()]; track pass) {
-            @for (row of visible(); track row.id; let i = $index) {
-                <button class="lb-row" [class.sel]="row.id === selected()" (click)="select(row.id)" [title]="'#' + (i + 1) + '  ' + row.name + ' — ' + def().format(row.value) + ' ' + sortLabel()">
-                    @if (i < 3) {
-                        <span class="medal" [class]="'m' + (i + 1)">{{ i + 1 }}</span>
-                    } @else {
-                        <span class="rk">{{ i + 1 }}</span>
-                    }
-                    <span class="nm">{{ row.name }}</span>
-                    <span class="track" [class.lolli]="kind() === Kind.Dots"><i class="fill" [style.width.%]="widthOf(row.value)"></i></span>
-                    <span class="val">{{ def().format(row.value) }}</span>
-                </button>
-            }
+                @for (row of visible(); track row.id; let i = $index) {
+                    <button class="lb-row" [class.sel]="row.id === selected()" (click)="select(row.id)" [title]="'#' + (i + 1) + '  ' + row.name + ' — ' + def().format(row.value) + ' ' + sortLabel()">
+                        @if (i < 3) {
+                            <span class="medal" [class]="'m' + (i + 1)">{{ i + 1 }}</span>
+                        } @else {
+                            <span class="rk">{{ i + 1 }}</span>
+                        }
+                        <span class="nm">{{ row.name }}</span>
+                        <span class="track" [class.lolli]="kind() === Kind.Dots"><i class="fill" [style.width.%]="widthOf(row.value)"></i></span>
+                        <span class="val">{{ def().format(row.value) }}</span>
+                    </button>
+                }
             }
             @if (!rows().length) {
                 <p class="empty">No contributors in this view.</p>
@@ -246,11 +248,7 @@ export class LeaderboardComponent {
     });
     // Re-key the rows so the bar-grow animation replays on data / metric / style changes.
     protected readonly renderKey = computed<string>(() => {
-        return `${this.kind()}:${this.listMode()}:${this.visible()
-            .map((row) => {
-                return row.value;
-            })
-            .join(',')}`;
+        return `${this.filters.viewKey()}:${this.kind()}:${this.listMode()}:${this.expanded()}`;
     });
     protected readonly hidden = computed<number>(() => {
         return Math.max(0, this.rows().length - LEADERBOARD_CAP);

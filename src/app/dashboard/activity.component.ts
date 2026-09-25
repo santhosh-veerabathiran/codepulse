@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AnalyticsStore, FiltersStore, format } from '../core';
-import { CalCell, Calendar, DowBar, Stat } from './types';
 import { DOW_NAMES, DOW_SHORT, HEATMAP_LEVELS, MONTHS } from './constants';
+import { ReplayDirective } from './replay.directive';
+import { CalCell, Calendar, DowBar, Stat } from './types';
 
 @Component({
     selector: 'cp-activity',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Cadence</p>
@@ -17,7 +19,7 @@ import { DOW_NAMES, DOW_SHORT, HEATMAP_LEVELS, MONTHS } from './constants';
         @if (!cell()) {
             <p class="empty card">No activity in this view.</p>
         } @else {
-            <div class="stats">
+            <div class="stats" *cpReplay="viewKey()">
                 @for (s of stats(); track s.label) {
                     <div class="stat card">
                         <span class="s-l">{{ s.label }}</span>
@@ -26,7 +28,7 @@ import { DOW_NAMES, DOW_SHORT, HEATMAP_LEVELS, MONTHS } from './constants';
                 }
             </div>
 
-            <div class="card block">
+            <div class="card block" *cpReplay="viewKey()">
                 <p class="bh">Daily commits</p>
                 @if (calendar().hasData) {
                     <div class="cal-wrap">
@@ -52,7 +54,7 @@ import { DOW_NAMES, DOW_SHORT, HEATMAP_LEVELS, MONTHS } from './constants';
                 }
             </div>
 
-            <div class="card block">
+            <div class="card block" *cpReplay="viewKey()">
                 <p class="bh">Weekday rhythm</p>
                 <div class="dow">
                     @for (b of weekdays(); track b.name) {
@@ -207,6 +209,7 @@ export class ActivityComponent {
 
     protected readonly legend = HEATMAP_LEVELS;
     protected readonly cell = this.analytics.selectedCell;
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });

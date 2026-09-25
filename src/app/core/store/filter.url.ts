@@ -9,7 +9,7 @@ export class FilterUrl {
 
     constructor() {
         this.restore();
-        window.addEventListener('hashchange', () => {
+        window.addEventListener('popstate', () => {
             this.restore();
         });
         effect(() => {
@@ -39,21 +39,20 @@ export class FilterUrl {
         if (filters.gran() !== GranKind.Auto) {
             params.set('group', filters.gran());
         }
+        if (filters.compareIds().length) {
+            params.set('compare', filters.compareIds().join(','));
+        }
         if (this.restoring) {
             return;
         }
         const query = params.toString();
-        const base = (location.hash.split('?')[0] || '#/') as string;
-        history.replaceState(null, '', query ? `${base}?${query}` : base);
+        // filters live in the query string; the section fragment (#sec-…) is owned by
+        // the shell, so preserve whatever fragment is currently on the URL.
+        history.replaceState(null, '', `${location.pathname}${query ? '?' + query : ''}${location.hash}`);
     }
 
     private restore() {
-        const hash = location.hash;
-        const markIndex = hash.indexOf('?');
-        if (markIndex < 0) {
-            return;
-        }
-        const params = new URLSearchParams(hash.slice(markIndex + 1));
+        const params = new URLSearchParams(location.search);
         this.restoring = true;
         const filters = this.filters;
         const person = params.get('person');
@@ -63,6 +62,15 @@ export class FilterUrl {
         filters.sortKey.set(params.get('rank') ?? 'code');
         filters.lineCat.set((params.get('lines') as LineCat) ?? LineCat.All);
         filters.gran.set((params.get('group') as GranKind) ?? GranKind.Auto);
+        filters.compareIds.set(
+            params
+                .get('compare')
+                ?.split(',')
+                .map(Number)
+                .filter((n) => {
+                    return !Number.isNaN(n);
+                }) ?? [],
+        );
         this.restoring = false;
     }
 

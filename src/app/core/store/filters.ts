@@ -16,15 +16,15 @@ export class FiltersStore {
     readonly incMerge = signal<boolean>(false);
 
     readonly isDefault = computed<boolean>(() => {
-        return (
-            !this.repoSel().length &&
-            this.period().kind === PeriodKind.All &&
-            this.personId() === ALL &&
-            !this.compareIds().length &&
-            this.sortKey() === 'code' &&
-            this.lineCat() === LineCat.All &&
-            this.gran() === GranKind.Auto
-        );
+        return !this.repoSel().length && this.period().kind === PeriodKind.All && this.personId() === ALL && !this.compareIds().length && this.sortKey() === 'code' && this.lineCat() === LineCat.All && this.gran() === GranKind.Auto;
+    });
+
+    // Changes whenever anything that affects what panels render changes — person,
+    // repos, period, timeline granularity, rank metric, line category. Panels use it
+    // as an animation replay key so entrance effects re-run on any of these.
+    readonly viewKey = computed<string>(() => {
+        const p = this.period();
+        return [this.personId(), this.repoSel().join(','), p.kind, p.year ?? '', p.days ?? '', p.from ?? '', p.to ?? '', this.sortKey(), this.lineCat(), this.gran(), this.incMerge()].join('|');
     });
 
     reset() {

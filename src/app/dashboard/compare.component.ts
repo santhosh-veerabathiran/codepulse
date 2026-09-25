@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AnalyticsStore, Cell, MetricKind, COMPARE_GROUPS, FiltersStore, percent } from '../core';
+import { AnalyticsStore, Cell, COMPARE_GROUPS, FiltersStore, MetricKind, percent } from '../core';
+import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
+import { ReplayDirective } from './replay.directive';
 import { SelectComponent } from './select.component';
 import { CmpBlock, CmpCell, CmpRow, ComparePerson, RadarModel, SelectOption, Standing } from './types';
-import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
 
 @Component({
     selector: 'cp-compare',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SelectComponent],
+    imports: [SelectComponent, ReplayDirective],
     template: `
         <div class="head">
             <div>
@@ -37,24 +38,34 @@ import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
         @if (people().length < 2) {
             <p class="empty card">Add at least two people to compare.</p>
         } @else {
-            <div class="board">
+            <div class="board" *cpReplay="replayKey()">
                 @for (s of standings(); track s.id) {
                     <div class="scard" [class.lead]="s.id === leaderId()" [style.--pc]="s.color">
                         <div class="sc-name"><span class="dot"></span>{{ s.name }}</div>
                         <div class="sc-nums">
-                            <div class="sc-g"><b class="craft">{{ s.craft }}</b><span>Craft</span></div>
-                            <div class="sc-g"><b class="out">{{ s.output }}</b><span>Output</span></div>
-                            <div class="sc-g"><b>{{ s.total }}</b><span>Total wins</span></div>
+                            <div class="sc-g">
+                                <b class="craft">{{ s.craft }}</b
+                                ><span>Craft</span>
+                            </div>
+                            <div class="sc-g">
+                                <b class="out">{{ s.output }}</b
+                                ><span>Output</span>
+                            </div>
+                            <div class="sc-g">
+                                <b>{{ s.total }}</b
+                                ><span>Total wins</span>
+                            </div>
                         </div>
                     </div>
                 }
             </div>
             <p class="verdict">{{ verdict() }}</p>
             <p class="legend-note">
-                <b class="craft">Craft</b> = wins on quality signals — tests, reviews, discipline, consistency, comment ratio, merge quality. <b class="out">Output</b> = wins on raw volume — commits, lines changed, MRs merged. They measure different things: high output isn't high craft, and vice-versa.
+                <b class="craft">Craft</b> = wins on quality signals — tests, reviews, discipline, consistency, comment ratio, merge quality. <b class="out">Output</b> = wins on raw volume — commits, lines changed, MRs merged. They measure different
+                things: high output isn't high craft, and vice-versa.
             </p>
 
-            <div class="tbl">
+            <div class="tbl" *cpReplay="replayKey()">
                 <div class="hrow" [style.grid-template-columns]="cols()">
                     <span class="hl">Metric</span>
                     @for (p of people(); track p.id) {
@@ -62,7 +73,9 @@ import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
                     }
                 </div>
                 @for (b of blocks(); track b.name) {
-                    <div class="grp" [class.craft]="b.craft">{{ b.name }}<span class="grp-tag">{{ b.tag }}</span></div>
+                    <div class="grp" [class.craft]="b.craft">
+                        {{ b.name }}<span class="grp-tag">{{ b.tag }}</span>
+                    </div>
                     @for (r of b.rows; track r.label) {
                         <div class="mrow" [style.grid-template-columns]="cols()">
                             <span class="ml">{{ r.label }}</span>
@@ -79,7 +92,7 @@ import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
 
             @if (radar(); as rd) {
                 <div class="grp">Profile — each axis scaled to the leader</div>
-                <div class="card viz">
+                <div class="card viz" *cpReplay="replayKey()">
                     <svg [attr.viewBox]="'0 0 ' + rdW + ' ' + rdH" class="radar">
                         @for (g of rd.grid; track $index) {
                             <polygon [attr.points]="g" fill="none" stroke="var(--line)" stroke-width="1" />
@@ -358,6 +371,28 @@ import { COMPARE_COLORS, MAX_COMPARE_PEOPLE } from './constants';
             display: block;
             height: 100%;
             border-radius: 3px;
+            transform-origin: left center;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .cbar i {
+                animation: cmp-grow 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+            }
+            @keyframes cmp-grow {
+                from {
+                    transform: scaleX(0);
+                }
+            }
+            .scard,
+            .mrow,
+            .viz {
+                animation: cmp-rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+            }
+            @keyframes cmp-rise {
+                from {
+                    opacity: 0;
+                    transform: translateY(8px);
+                }
+            }
         }
         .empty {
             padding: 40px;
@@ -411,6 +446,13 @@ export class CompareComponent {
     protected readonly rdW = 360;
     protected readonly rdH = 300;
 
+    protected readonly replayKey = computed<string>(() => {
+        return `${this.filters.viewKey()}:${this.people()
+            .map((p) => {
+                return p.id;
+            })
+            .join(',')}`;
+    });
     protected readonly people = computed<ComparePerson[]>(() => {
         const out: ComparePerson[] = [];
         this.filters.compareIds().forEach((id, i) => {

@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, format, formatCompact, percent, ThemeStore } from '../core';
 import { ChartToggleComponent, mapCompKind } from './chart.toggle.component';
-import { CategoryItem, ChartKind, Composition, DistRow, SizeCard, Split } from './types';
 import { QUALITY_CATEGORIES, SIZE_BUCKETS } from './constants';
+import { ReplayDirective } from './replay.directive';
+import { CategoryItem, ChartKind, Composition, DistRow, SizeCard, Split } from './types';
 
 @Component({
     selector: 'cp-quality',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ChartToggleComponent],
+    imports: [ChartToggleComponent, ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Code quality</p>
@@ -19,7 +20,7 @@ import { QUALITY_CATEGORIES, SIZE_BUCKETS } from './constants';
         @if (!cell()) {
             <p class="empty card">No commits in this view.</p>
         } @else {
-            <div class="split-grid">
+            <div class="split-grid" *cpReplay="viewKey()">
                 <div class="card block">
                     <div class="bhead">
                         <p class="bh">Composition</p>
@@ -79,7 +80,9 @@ import { QUALITY_CATEGORIES, SIZE_BUCKETS } from './constants';
                         <span><i style="background: var(--s1)"></i>Code {{ split().codeText }}</span>
                         <span><i style="background: var(--s3)"></i>Comments {{ split().cmtText }}</span>
                     </div>
-                    <p class="cap">Comment lines are <b>{{ split().ratio }}</b> of the code+comment total they wrote.</p>
+                    <p class="cap">
+                        Comment lines are <b>{{ split().ratio }}</b> of the code+comment total they wrote.
+                    </p>
                 </div>
             </div>
 
@@ -488,6 +491,7 @@ export class QualityComponent {
     private readonly theme = inject(ThemeStore);
 
     protected readonly cell = this.analytics.selectedCell;
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });
@@ -606,5 +610,4 @@ export class QualityComponent {
             return { label: b.label, count: counts[i], w: (counts[i] / max) * 100 };
         });
     });
-
 }

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
-import { DayCell, ViewMonth } from './types';
 import { MONTHS, WEEKDAYS } from './constants';
+import { DayCell, ViewMonth } from './types';
 
 @Component({
     selector: 'cp-date-picker',
@@ -42,14 +42,7 @@ import { MONTHS, WEEKDAYS } from './constants';
                         @if (cell.blank) {
                             <span class="cell blank"></span>
                         } @else {
-                            <button
-                                type="button"
-                                class="cell"
-                                [class.selected]="cell.selected"
-                                [class.today]="cell.today"
-                                [disabled]="cell.disabled"
-                                (click)="choose(cell, $event)"
-                            >
+                            <button type="button" class="cell" [class.selected]="cell.selected" [class.today]="cell.today" [disabled]="cell.disabled" (click)="choose(cell, $event)">
                                 {{ cell.day }}
                             </button>
                         }

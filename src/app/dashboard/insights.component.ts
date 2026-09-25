@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AnalyticsStore, Cell, ALL, FiltersStore, format, formatDuration, formatCompact, percent } from '../core';
-import { Insight } from './types';
+import { ALL, AnalyticsStore, Cell, FiltersStore, format, formatCompact, formatDuration, percent } from '../core';
 import { MONTHS } from './constants';
+import { ReplayDirective } from './replay.directive';
+import { Insight } from './types';
 
 @Component({
     selector: 'cp-insights',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Signals</p>
@@ -17,7 +19,7 @@ import { MONTHS } from './constants';
         @if (!cell()) {
             <p class="empty card">No activity to read in this view.</p>
         } @else {
-            <div class="card list">
+            <div class="card list" *cpReplay="viewKey()">
                 @for (i of insights(); track i.text) {
                     <div class="row">
                         <span class="ic">{{ i.icon }}</span>
@@ -100,6 +102,7 @@ export class InsightsComponent {
     private readonly filters = inject(FiltersStore);
 
     protected readonly cell = this.analytics.selectedCell;
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });

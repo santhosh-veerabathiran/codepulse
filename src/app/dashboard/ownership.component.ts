@@ -1,19 +1,26 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { AnalyticsStore, OwnContrib, OwnRow, ALL, FactsStore, FiltersStore, formatCompact, percent } from '../core';
+import { ALL, AnalyticsStore, FactsStore, FiltersStore, formatCompact, OwnContrib, OwnRow, percent } from '../core';
 import { ChartToggleComponent } from './chart.toggle.component';
+import { ReplayDirective } from './replay.directive';
 import { ChartKind } from './types';
 @Component({
     selector: 'cp-ownership',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet, ChartToggleComponent],
+    imports: [NgTemplateOutlet, ChartToggleComponent, ReplayDirective],
     template: `
         <div class="head">
             <div>
                 <p class="eyebrow">Service ownership</p>
                 <h2>{{ personMode() ? name() + ' — where they own the code' : 'Bus factor &amp; ownership' }}</h2>
-                <p class="sub">{{ personMode() ? "Each service's code that belongs to them. Blue = primary owner (≥50%)." : "Top contributor's share of each service's code. Red = one person owns ≥70% (fragile); green = well-shared. Click a row for the full split." }}</p>
+                <p class="sub">
+                    {{
+                        personMode()
+                            ? "Each service's code that belongs to them. Blue = primary owner (≥50%)."
+                            : "Top contributor's share of each service's code. Red = one person owns ≥70% (fragile); green = well-shared. Click a row for the full split."
+                    }}
+                </p>
             </div>
             <div class="ctrls">
                 <cp-chart-toggle [kinds]="kinds" [value]="barKind()" (picked)="setKind($event)" />
@@ -26,8 +33,10 @@ import { ChartKind } from './types';
         }
 
         @if (apps().length) {
-            <p class="grp">Applications <span class="ct">{{ appsTotal() }}</span></p>
-            <div class="card list">
+            <p class="grp">
+                Applications <span class="ct">{{ appsTotal() }}</span>
+            </p>
+            <div class="card list" *cpReplay="viewKey()">
                 @for (r of apps(); track r.name) {
                     <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r: r }" />
                 }
@@ -38,8 +47,10 @@ import { ChartKind } from './types';
         }
 
         @if (libs().length) {
-            <p class="grp">Libraries &amp; shared <span class="ct">{{ libsTotal() }}</span></p>
-            <div class="card list">
+            <p class="grp">
+                Libraries &amp; shared <span class="ct">{{ libsTotal() }}</span>
+            </p>
+            <div class="card list" *cpReplay="viewKey()">
                 @for (r of libs(); track r.name) {
                     <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r: r }" />
                 }
@@ -65,7 +76,10 @@ import { ChartKind } from './types';
                 <div class="breakdown">
                     <div class="donut-wrap">
                         <div class="donut" [style.background]="donutStops(r.contribs)">
-                            <div class="dhole"><b>{{ r.contribs.length }}</b><small>people</small></div>
+                            <div class="dhole">
+                                <b>{{ r.contribs.length }}</b
+                                ><small>people</small>
+                            </div>
                         </div>
                     </div>
                     <div class="bd-list">
@@ -74,7 +88,9 @@ import { ChartKind } from './types';
                                 <span class="sw" [style.background]="cColor(i)"></span>
                                 <span class="bd-n">{{ c.name }}</span>
                                 <div class="bd-track"><i [style.width.%]="c.share" [style.background]="cColor(i)"></i></div>
-                                <span class="bd-v">{{ c.share.toFixed(0) }}%<em>{{ format(c.lines) }}</em></span>
+                                <span class="bd-v"
+                                    >{{ c.share.toFixed(0) }}%<em>{{ format(c.lines) }}</em></span
+                                >
                             </div>
                         }
                     </div>
@@ -445,6 +461,7 @@ export class OwnershipComponent {
         return rows;
     });
 
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly cap = 15;
     protected readonly Kind = ChartKind;
     protected readonly kinds: ChartKind[] = [ChartKind.Bar, ChartKind.Dots];

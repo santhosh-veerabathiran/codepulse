@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MR, MrState, FactsStore, FiltersStore, ThemeStore, percent } from '../core';
+import { FactsStore, FiltersStore, MR, MrState, ThemeStore, percent } from '../core';
 import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
 import { ChartKind, Integrator, Rel } from './types';
 
@@ -209,11 +209,7 @@ export class CollabComponent {
     }
 
     protected readonly renderKey = computed<string>(() => {
-        return `${this.kind()}:${this.relationships()
-            .map((row) => {
-                return row.width;
-            })
-            .join(',')}:${this.integrators().length}`;
+        return `${this.filters.viewKey()}:${this.kind()}`;
     });
 
     private readonly merged = computed<{ author: number; merger: number }[]>(() => {

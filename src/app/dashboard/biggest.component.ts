@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AnalyticsStore, FactsStore, FiltersStore, format } from '../core';
+import { ReplayDirective } from './replay.directive';
 import { BiggestRow } from './types';
 
 @Component({
     selector: 'cp-biggest',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReplayDirective],
     template: `
         <div class="head">
             <p class="eyebrow">Heavy lifts</p>
@@ -15,7 +17,7 @@ import { BiggestRow } from './types';
         @if (!rows().length) {
             <p class="empty card">No commits in this view.</p>
         } @else {
-            <div class="card block">
+            <div class="card block" *cpReplay="viewKey()">
                 @for (b of rows(); track b.sha; let i = $index) {
                     <div class="row" [title]="b.title + ' — ' + b.lines + ' lines · ' + b.repo">
                         @if (i < 3) {
@@ -214,6 +216,7 @@ export class BiggestComponent {
     private readonly facts = inject(FactsStore);
     private readonly filters = inject(FiltersStore);
 
+    protected readonly viewKey = this.filters.viewKey;
     protected readonly name = computed<string>(() => {
         return this.analytics.personName(this.filters.personId());
     });
@@ -221,9 +224,12 @@ export class BiggestComponent {
     protected readonly rows = computed<BiggestRow[]>(() => {
         const commits = this.analytics.selectedCell()?.largest ?? [];
         const template = this.facts.facts()?.commitUrl ?? '';
-        const max = Math.max(1, ...commits.map((c) => {
-            return c.lines;
-        }));
+        const max = Math.max(
+            1,
+            ...commits.map((c) => {
+                return c.lines;
+            }),
+        );
         return commits.map((c) => {
             return {
                 date: c.date,

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AnalyticsStore, ALL, SORTS, FactsStore, GRAN_LABEL, GranKind, LINE_LABEL, LineCat, PeriodKind, FiltersStore } from '../core';
+import { ALL, AnalyticsStore, FactsStore, FiltersStore, GRAN_LABEL, GranKind, LINE_LABEL, LineCat, PeriodKind, SORTS } from '../core';
 import { DatePickerComponent } from './date.picker.component';
 import { SelectComponent } from './select.component';
 import { Chip, SelectOption } from './types';
@@ -11,16 +11,7 @@ import { Chip, SelectOption } from './types';
     imports: [SelectComponent, DatePickerComponent],
     template: `
         <div class="bar card">
-            <cp-select
-                class="field"
-                label="Repositories"
-                [multi]="true"
-                allLabel="All repos"
-                [options]="repoOpts()"
-                [selected]="repoSel()"
-                (picked)="toggleRepo($event)"
-                (groupPicked)="toggleGroup($event)"
-            />
+            <cp-select class="field" label="Repositories" [multi]="true" allLabel="All repos" [options]="repoOpts()" [selected]="repoSel()" (picked)="toggleRepo($event)" (groupPicked)="toggleGroup($event)" />
             <cp-select class="field" label="Period" [options]="periodOpts()" [value]="periodValue()" (picked)="setPeriod($event)" />
             @if (personSpan()) {
                 <button type="button" class="span" (click)="setSpan()" title="Scope the period to this person's first → last commit">⏱ Their span</button>

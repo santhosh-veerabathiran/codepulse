@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
-import { AnalyticsStore, ALL, FactsStore, FiltersStore, NavStore } from '../core';
+import { ALL, AnalyticsStore, FactsStore, FiltersStore, NavStore } from '../core';
 import { Command } from './types';
 
 @Component({
