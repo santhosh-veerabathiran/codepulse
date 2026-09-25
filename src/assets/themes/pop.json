@@ -1,0 +1,66 @@
+{
+    "schemaVersion": 1,
+    "name": "Pop",
+    "mode": "light",
+    "tokens": {
+        "app": "#eef1f7",
+        "surface": "#ffffff",
+        "surface2": "#f2f5fb",
+        "raise": "#ffffff",
+        "ink": "#131826",
+        "ink2": "#4a556b",
+        "muted": "#8892a6",
+        "line": "rgba(18,24,44,.11)",
+        "line2": "rgba(18,24,44,.055)",
+        "track": "rgba(18,24,44,.07)",
+        "accent": "#2563eb",
+        "accentInk": "#1d4ed8",
+        "accentSoft": "rgba(37,99,235,.10)",
+        "accentLine": "rgba(37,99,235,.32)",
+        "glass": "linear-gradient(150deg, rgba(255,255,255,0.80), rgba(255,255,255,0.64))",
+        "glassBorder": "rgba(255,255,255,.8)",
+        "glassSheen": "rgba(255,255,255,0.55)",
+        "series": [
+            "#2563eb",
+            "#dc2626",
+            "#f59e0b",
+            "#16a34a",
+            "#7c3aed",
+            "#db2777",
+            "#0891b2",
+            "#ea580c"
+        ],
+        "gradient": [
+            "#2563eb",
+            "#db2777"
+        ],
+        "good": "#0ea371",
+        "warn": "#d97706",
+        "bad": "#ef4657",
+        "shadow1": "0 1px 2px rgba(18,24,44,.05)",
+        "shadow2": "0 10px 34px rgba(18,24,44,.10)",
+        "radius": "14px",
+        "blur": "6px",
+        "mesh": "radial-gradient(900px 700px at 10% 2%,rgba(37,99,235,.16),transparent 58%),radial-gradient(900px 720px at 92% 4%,rgba(219,39,119,.14),transparent 58%),radial-gradient(900px 760px at 84% 98%,rgba(245,158,11,.14),transparent 58%),radial-gradient(800px 700px at 4% 98%,rgba(22,163,74,.12),transparent 58%)",
+        "meshOpacity": 0.9,
+        "accentItalic": "normal"
+    },
+    "pattern": {
+        "type": "halftone",
+        "image": "radial-gradient(circle,rgba(30,60,200,.12) 2px,transparent 2.6px)",
+        "size": "15px 15px",
+        "opacity": 0.7
+    },
+    "charts": {
+        "trend": "bars",
+        "composition": "donut",
+        "ranking": "bar"
+    },
+    "density": "compact",
+    "fonts": {
+        "sans": "'Trebuchet MS', 'Segoe UI', system-ui, sans-serif",
+        "display": "'Trebuchet MS', 'Segoe UI', sans-serif",
+        "mono": "ui-monospace, monospace"
+    },
+    "iconStroke": 2.4
+}

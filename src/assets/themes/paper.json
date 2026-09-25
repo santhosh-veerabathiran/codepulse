@@ -1,0 +1,66 @@
+{
+    "schemaVersion": 1,
+    "name": "Paper",
+    "mode": "light",
+    "tokens": {
+        "app": "#eef0f6",
+        "surface": "#ffffff",
+        "surface2": "#f4f5fb",
+        "raise": "#ffffff",
+        "ink": "#131826",
+        "ink2": "#4a556b",
+        "muted": "#8892a6",
+        "line": "rgba(18,24,44,.11)",
+        "line2": "rgba(18,24,44,.055)",
+        "track": "rgba(18,24,44,.07)",
+        "accent": "#7c3aed",
+        "accentInk": "#6d28d9",
+        "accentSoft": "rgba(124,58,237,.10)",
+        "accentLine": "rgba(124,58,237,.32)",
+        "glass": "linear-gradient(150deg, rgba(255,255,255,0.76), rgba(255,255,255,0.60))",
+        "glassBorder": "rgba(255,255,255,.8)",
+        "glassSheen": "rgba(255,255,255,0.55)",
+        "series": [
+            "#7c3aed",
+            "#db2777",
+            "#d97706",
+            "#059669",
+            "#2563eb",
+            "#dc2626",
+            "#0891b2",
+            "#c026d3"
+        ],
+        "gradient": [
+            "#7c3aed",
+            "#db2777"
+        ],
+        "good": "#0ea371",
+        "warn": "#d97706",
+        "bad": "#ef4657",
+        "shadow1": "0 1px 2px rgba(18,24,44,.05)",
+        "shadow2": "0 10px 34px rgba(18,24,44,.10)",
+        "radius": "8px",
+        "blur": "0px",
+        "mesh": "radial-gradient(1000px 760px at 12% 4%,rgba(124,58,237,.14),transparent 60%),radial-gradient(1000px 820px at 92% 2%,rgba(37,99,235,.1),transparent 60%),radial-gradient(900px 760px at 84% 98%,rgba(219,39,119,.1),transparent 60%)",
+        "meshOpacity": 0.8,
+        "accentItalic": "italic"
+    },
+    "pattern": {
+        "type": "dots",
+        "image": "radial-gradient(rgba(30,40,80,.07) 1px,transparent 1.5px)",
+        "size": "18px 18px",
+        "opacity": 0.5
+    },
+    "charts": {
+        "trend": "line",
+        "composition": "donut",
+        "ranking": "list"
+    },
+    "density": "compact",
+    "fonts": {
+        "sans": "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif",
+        "display": "'Iowan Old Style', Palatino, Georgia, serif",
+        "mono": "'Courier New', ui-monospace, monospace"
+    },
+    "iconStroke": 1.5
+}
