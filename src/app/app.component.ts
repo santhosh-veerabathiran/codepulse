@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ShellComponent } from './dashboard/shell.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
     selector: 'cp-root',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ShellComponent],
-    template: `<cp-shell />`,
+    imports: [RouterOutlet],
+    template: `<router-outlet />`,
     styles: `
         :host {
             display: block;
