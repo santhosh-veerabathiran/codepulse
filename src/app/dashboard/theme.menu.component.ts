@@ -1,20 +1,27 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ThemeStore } from '../core';
+import { THEME_SWATCH } from './constants';
+import { UiIconComponent } from './ui.icon.component';
+
 @Component({
     selector: 'cp-theme-menu',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [UiIconComponent],
     template: `
-        <button type="button" class="trigger" (click)="toggle()" aria-label="Theme">🎨</button>
+        <button type="button" class="trigger" (click)="toggle()" aria-label="Theme">
+            <cp-icon name="palette" [size]="17" />
+        </button>
         @if (open()) {
             <div class="scrim" (click)="close()"></div>
             <div class="panel" role="menu">
                 <p class="ph">Theme</p>
                 @for (t of store.themes; track t.slug) {
                     <button type="button" class="opt" [class.on]="t.slug === store.current()" (click)="pick(t.slug)">
-                        <span>{{ t.name }}</span>
+                        <span class="sw" [style.background]="swatch(t.slug)"></span>
+                        <span class="nm">{{ t.name }}</span>
                         @if (t.slug === store.current()) {
-                            <span class="tick">✓</span>
+                            <cp-icon class="tick" name="check" [size]="14" [stroke]="2.4" />
                         }
                     </button>
                 }
@@ -33,7 +40,8 @@ import { ThemeStore } from '../core';
             border-radius: 9px;
             width: 38px;
             height: 38px;
-            font-size: 15px;
+            display: grid;
+            place-items: center;
             cursor: pointer;
             flex: none;
         }
@@ -69,7 +77,7 @@ import { ThemeStore } from '../core';
         .opt {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
             width: 100%;
             border: 0;
             background: none;
@@ -88,15 +96,29 @@ import { ThemeStore } from '../core';
             background: var(--acc-soft);
             color: var(--acc-ink, var(--acc));
         }
+        .sw {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            flex: none;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        }
+        .nm {
+            flex: 1;
+        }
         .tick {
-            font-family: var(--mono);
             color: var(--acc);
+            flex: none;
         }
     `,
 })
 export class ThemeMenuComponent {
     protected readonly store = inject(ThemeStore);
     protected readonly open = signal<boolean>(false);
+
+    protected swatch(slug: string): string {
+        return THEME_SWATCH[slug] ?? 'var(--grad, var(--acc))';
+    }
 
     protected toggle() {
         this.open.update((value) => {

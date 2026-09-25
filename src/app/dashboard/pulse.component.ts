@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ALL, AnalyticsStore, Cell, FiltersStore, format, formatCompact, formatDuration, percent, ThemeStore } from '../core';
-import { ChartToggleComponent, mapTrendKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { ChartTipComponent } from './chart.tooltip.component';
 import { EMPTY_SERIES, PULSE_LAYOUT } from './constants';
 import { ReplayDirective } from './replay.directive';
 import { ChartKind, ChartPoint, ChartTip, PulseKpi, SeriesChart, Tick } from './types';
+import { mapTrendKind } from './utils';
 
 const { w: W, h: H, ml: ML, mr: MR, mt: MT, mb: MB } = PULSE_LAYOUT;
 const PW = W - ML - MR;
@@ -17,9 +18,8 @@ const PH = H - MT - MB;
     imports: [ChartToggleComponent, ChartTipComponent, ReplayDirective],
     template: `
         <div class="head">
-            <p class="eyebrow">Team pulse</p>
-            <h2>How the team is doing</h2>
-            <p class="sub">Whole-team activity over time, within the current repo &amp; period.</p>
+            <p class="eyebrow">Team Pulse</p>
+            <h2>How the Team Is Doing</h2>
         </div>
 
         @if (!cell()) {
@@ -367,7 +367,7 @@ export class PulseComponent {
 
     private buildTip(points: ChartPoint[], index: number, label: string): ChartTip | undefined {
         if (index < 0 || index >= points.length) {
-            return undefined;
+            return;
         }
         const p = points[index];
         return { xPct: (p.x / 900) * 100, title: p.label, rows: [{ label, value: p.value, color: 'var(--acc)' }] };

@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, format, formatCompact, percent, ThemeStore } from '../core';
-import { ChartToggleComponent, mapCompKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { QUALITY_CATEGORIES, SIZE_BUCKETS } from './constants';
 import { ReplayDirective } from './replay.directive';
 import { CategoryItem, ChartKind, Composition, DistRow, SizeCard, Split } from './types';
+import { mapCompKind } from './utils';
 
 @Component({
     selector: 'cp-quality',
@@ -12,9 +13,8 @@ import { CategoryItem, ChartKind, Composition, DistRow, SizeCard, Split } from '
     imports: [ChartToggleComponent, ReplayDirective],
     template: `
         <div class="head">
-            <p class="eyebrow">Code quality</p>
-            <h2>{{ name() }} — what the code is made of</h2>
-            <p class="sub">Line composition by category and typical commit size in this view.</p>
+            <p class="eyebrow">Code Quality</p>
+            <h2>{{ name() }} — What the Code Is Made Of</h2>
         </div>
 
         @if (!cell()) {

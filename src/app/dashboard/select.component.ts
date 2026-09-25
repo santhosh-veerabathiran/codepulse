@@ -1,22 +1,30 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { OptionGroup, SelectOption } from './types';
+import { UiIconComponent } from './ui.icon.component';
 
 @Component({
     selector: 'cp-select',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [UiIconComponent],
     template: `
         @if (label()) {
             <span class="flabel">{{ label() }}</span>
         }
         <button type="button" class="trig" [class.open]="open()" (click)="toggle($event)">
+            @if (icon()) {
+                <cp-icon class="lead" [name]="icon()" [size]="15" />
+            }
             <span class="tval">{{ triggerText() }}</span>
-            <span class="chev" aria-hidden="true">▾</span>
+            <cp-icon class="chev" name="chevron" [size]="14" />
         </button>
         @if (open()) {
             <div class="panel" role="listbox">
                 @if (showSearch()) {
-                    <input class="search" type="text" [value]="query()" (input)="query.set($any($event.target).value)" (click)="$event.stopPropagation()" placeholder="Search…" autofocus />
+                    <div class="searchwrap">
+                        <cp-icon class="sicon" name="search" [size]="14" />
+                        <input class="search" type="text" [value]="query()" (input)="query.set($any($event.target).value)" (click)="$event.stopPropagation()" placeholder="Search…" autofocus />
+                    </div>
                 }
                 @for (g of grouped(); track g.name) {
                     @if (g.name) {
@@ -33,14 +41,18 @@ import { OptionGroup, SelectOption } from './types';
                     @for (o of g.options; track o.value) {
                         <button type="button" class="opt" [class.on]="isOn(o.value)" (click)="choose(o.value, $event)">
                             @if (multi()) {
-                                <span class="box" [class.checked]="isOn(o.value)">{{ isOn(o.value) ? '✓' : '' }}</span>
+                                <span class="box" [class.checked]="isOn(o.value)">
+                                    @if (isOn(o.value)) {
+                                        <cp-icon name="check" [size]="11" [stroke]="2.6" />
+                                    }
+                                </span>
                             }
                             <span class="olbl">{{ o.label }}</span>
                             @if (o.hint) {
                                 <span class="ohint">{{ o.hint }}</span>
                             }
                             @if (!multi() && isOn(o.value)) {
-                                <span class="tick">✓</span>
+                                <cp-icon class="tick" name="check" [size]="14" [stroke]="2.4" />
                             }
                         </button>
                     }
@@ -83,18 +95,36 @@ import { OptionGroup, SelectOption } from './types';
             border-color: var(--acc);
             box-shadow: 0 0 0 3px var(--acc-soft);
         }
+        .lead {
+            color: var(--acc-ink, var(--acc));
+            flex: none;
+        }
         .tval {
+            flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .chev {
             color: var(--muted);
-            font-size: 10px;
-            transition: transform 0.15s;
+            flex: none;
+            transition: transform 0.16s ease;
         }
         .trig.open .chev {
             transform: rotate(180deg);
+            color: var(--acc);
+        }
+        .searchwrap {
+            position: relative;
+            margin-bottom: 4px;
+        }
+        .searchwrap .sicon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
         }
         .panel {
             position: absolute;
@@ -109,7 +139,7 @@ import { OptionGroup, SelectOption } from './types';
             border-radius: 12px;
             box-shadow: var(--sh-2, 0 12px 40px rgba(0, 0, 0, 0.45));
             padding: 5px;
-            z-index: 200;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
             gap: 1px;
@@ -121,10 +151,9 @@ import { OptionGroup, SelectOption } from './types';
             color: var(--ink);
             border: 1px solid var(--line);
             border-radius: 8px;
-            padding: 8px 10px;
+            padding: 8px 10px 8px 30px;
             font: 500 12.5px var(--font);
             outline: none;
-            margin-bottom: 4px;
         }
         .search:focus {
             border-color: var(--acc);
@@ -186,18 +215,21 @@ import { OptionGroup, SelectOption } from './types';
         }
         .tick {
             color: var(--acc);
+            flex: none;
         }
         .box {
-            width: 16px;
-            height: 16px;
+            width: 17px;
+            height: 17px;
             flex: none;
             border-radius: 5px;
             border: 1px solid var(--line);
             display: grid;
             place-items: center;
-            font-size: 10px;
             color: #04121c;
             background: var(--surface-2);
+            transition:
+                background 0.13s,
+                border-color 0.13s;
         }
         .box.checked {
             background: var(--acc);
@@ -209,6 +241,7 @@ export class SelectComponent {
     private readonly host = inject(ElementRef<HTMLElement>);
 
     readonly label = input<string>('');
+    readonly icon = input<string>('');
     readonly options = input<SelectOption[]>([]);
     readonly value = input<string>('');
     readonly selected = input<string[]>([]);

@@ -189,6 +189,6 @@ export class FactsStore {
         if (f && Array.isArray(f.F) && Array.isArray(f.MR) && Array.isArray(f.roster) && Array.isArray(f.repos)) {
             return f as Facts;
         }
-        return undefined;
+        return;
     }
 }

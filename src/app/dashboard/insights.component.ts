@@ -12,8 +12,7 @@ import { Insight } from './types';
     template: `
         <div class="head">
             <p class="eyebrow">Signals</p>
-            <h2>{{ name() }} — what stands out</h2>
-            <p class="sub">Automatic reading of the numbers in the current repo &amp; period.</p>
+            <h2>{{ name() }} — What Stands Out</h2>
         </div>
 
         @if (!cell()) {

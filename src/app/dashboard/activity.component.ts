@@ -12,8 +12,7 @@ import { CalCell, Calendar, DowBar, Stat } from './types';
     template: `
         <div class="head">
             <p class="eyebrow">Cadence</p>
-            <h2>{{ name() }} — activity</h2>
-            <p class="sub">When the work happens — daily commit heatmap and weekday rhythm, within the current repo &amp; period.</p>
+            <h2>{{ name() }} — Activity</h2>
         </div>
 
         @if (!cell()) {

@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FactsStore, FiltersStore, ThemeStore, format, formatCompact } from '../core';
-import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { SERIES_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
 import { ChartKind, DonutItem, RankBucketDim, RankMetric, RepoRow } from './types';
+import { mapRankKind } from './utils';
 
 @Component({
     selector: 'cp-repos',
@@ -13,9 +14,8 @@ import { ChartKind, DonutItem, RankBucketDim, RankMetric, RepoRow } from './type
     template: `
         <div class="head">
             <div>
-                <p class="eyebrow">Where it landed</p>
-                <h2>{{ name() }} — by repository</h2>
-                <p class="sub">Each repository's {{ rankDim().label }} in this view, ranked by volume. Front-end and back-end are coloured apart.</p>
+                <p class="eyebrow">Where It Landed</p>
+                <h2>{{ name() }} — By Repository</h2>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>

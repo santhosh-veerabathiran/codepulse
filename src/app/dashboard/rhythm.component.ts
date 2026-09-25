@@ -12,8 +12,7 @@ import { RecordCard } from './types';
     template: `
         <div class="head">
             <p class="eyebrow">Cadence</p>
-            <h2>{{ name() }} — rhythm, streaks &amp; records</h2>
-            <p class="sub">Consistency and personal bests within the current repo &amp; period.</p>
+            <h2>{{ name() }} — Rhythm, Streaks &amp; Records</h2>
         </div>
         @if (records(); as rs) {
             <div class="records" *cpReplay="viewKey()">

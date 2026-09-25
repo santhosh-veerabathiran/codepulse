@@ -12,7 +12,6 @@ import { Delta, KpiCard, KpiSpec } from './types';
         <div class="who">
             <p class="eyebrow">Selected</p>
             <h2>{{ name() }}</h2>
-            <p class="sub">{{ subline() }}</p>
         </div>
         @for (pass of [renderKey()]; track pass) {
             <div class="kpis">
@@ -241,11 +240,11 @@ export class KpisComponent {
             }, 0) || 1;
         const specs: KpiSpec[] = [
             { label: 'Commits', raw: c.commits, fmt: format, sub: `${formatCompact(c.additions + c.deletions)} lines`, color: 'var(--acc)', icon: 'commits', idx: 0 },
-            { label: 'Code lines', raw: c.categories['code'] || 0, fmt: formatCompact, sub: `${percent(c.categories['code'] || 0, catTot).toFixed(0)}% of changes`, color: 'var(--acc)', icon: 'code', idx: 2 },
-            { label: 'MRs merged', raw: c.mergeRequests.merged, fmt: format, sub: `${c.mergeRequests.rate ?? '—'}% merge rate`, color: 'var(--acc)', icon: 'merge', idx: 4 },
+            { label: 'Code Lines', raw: c.categories['code'] || 0, fmt: formatCompact, sub: `${percent(c.categories['code'] || 0, catTot).toFixed(0)}% of changes`, color: 'var(--acc)', icon: 'code', idx: 2 },
+            { label: 'MRs Merged', raw: c.mergeRequests.merged, fmt: format, sub: `${c.mergeRequests.rate ?? '—'}% merge rate`, color: 'var(--acc)', icon: 'merge', idx: 4 },
             { label: 'Reviews', raw: c.mergeRequests.reviewed, fmt: format, sub: 'for others', color: 'var(--acc)', icon: 'review', idx: -1 },
-            { label: 'Active days', raw: c.days, fmt: format, sub: `${(c.days ? c.commits / c.days : 0).toFixed(1)} commits/day`, color: 'var(--acc)', icon: 'days', idx: -1 },
-            { label: 'Median merge', raw: c.mergeRequests.timeToMerge ?? 0, fmt: formatDuration, sub: 'time to merge', color: 'var(--acc)', icon: 'clock', idx: -1 },
+            { label: 'Active Days', raw: c.days, fmt: format, sub: `${(c.days ? c.commits / c.days : 0).toFixed(1)} commits/day`, color: 'var(--acc)', icon: 'days', idx: -1 },
+            { label: 'Median Merge', raw: c.mergeRequests.timeToMerge ?? 0, fmt: formatDuration, sub: 'time to merge', color: 'var(--acc)', icon: 'clock', idx: -1 },
         ];
         return specs.map((s) => {
             const series = s.idx >= 0 ? this.seriesFor(c, s.idx) : undefined;

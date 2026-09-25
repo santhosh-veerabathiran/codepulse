@@ -42,7 +42,7 @@ export class FiltersStore {
         const sel = this.repoSel();
         const facts = this.factsStore.facts();
         if (!sel.length || !facts) {
-            return undefined;
+            return;
         }
         const set = new Set<number>();
         facts.repos.forEach((r, i) => {

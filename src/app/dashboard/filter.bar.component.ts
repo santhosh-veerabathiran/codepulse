@@ -11,14 +11,14 @@ import { Chip, SelectOption } from './types';
     imports: [SelectComponent, DatePickerComponent],
     template: `
         <div class="bar card">
-            <cp-select class="field" label="Repositories" [multi]="true" allLabel="All repos" [options]="repoOpts()" [selected]="repoSel()" (picked)="toggleRepo($event)" (groupPicked)="toggleGroup($event)" />
-            <cp-select class="field" label="Period" [options]="periodOpts()" [value]="periodValue()" (picked)="setPeriod($event)" />
+            <cp-select class="field" label="Repositories" icon="folder" [multi]="true" allLabel="All repos" [options]="repoOpts()" [selected]="repoSel()" (picked)="toggleRepo($event)" (groupPicked)="toggleGroup($event)" />
+            <cp-select class="field" label="Period" icon="calendar" [options]="periodOpts()" [value]="periodValue()" (picked)="setPeriod($event)" />
             @if (personSpan()) {
-                <button type="button" class="span" (click)="setSpan()" title="Scope the period to this person's first → last commit">⏱ Their span</button>
+                <button type="button" class="span" (click)="setSpan()" title="Scope the period to this person's first → last commit">⏱ Their Span</button>
             }
             @if (periodValue() === 'range') {
                 <div class="field">
-                    <span class="flabel">Date range</span>
+                    <span class="flabel">Date Range</span>
                     <div class="range">
                         <cp-date-picker placeholder="From" [value]="rangeFrom()" (picked)="setFrom($event)" />
                         <span class="rsep">→</span>
@@ -26,9 +26,9 @@ import { Chip, SelectOption } from './types';
                     </div>
                 </div>
             }
-            <cp-select class="field" label="Rank team by" [options]="sortOpts()" [value]="sortKey()" (picked)="setSort($event)" />
-            <cp-select class="field" label="Lines by category" [options]="lineOpts()" [value]="lineCat()" (picked)="setLineCat($event)" />
-            <cp-select class="field" label="Group Timeline By" [options]="granOpts()" [value]="gran()" (picked)="setGran($event)" />
+            <cp-select class="field" label="Rank Team By" icon="award" [options]="sortOpts()" [value]="sortKey()" (picked)="setSort($event)" />
+            <cp-select class="field" label="Lines by Category" icon="code" [options]="lineOpts()" [value]="lineCat()" (picked)="setLineCat($event)" />
+            <cp-select class="field" label="Group Timeline By" icon="layers" [options]="granOpts()" [value]="gran()" (picked)="setGran($event)" />
         </div>
         @if (chips().length) {
             <div class="chips">
@@ -39,7 +39,7 @@ import { Chip, SelectOption } from './types';
                         <button type="button" class="x" (click)="c.clear()" [attr.aria-label]="'Remove ' + c.key + ' filter'">✕</button>
                     </span>
                 }
-                <button type="button" class="clr" (click)="clear()">Clear filters</button>
+                <button type="button" class="clr" (click)="clear()">Clear Filters</button>
             </div>
         }
     `,
@@ -256,14 +256,14 @@ export class FilterBarComponent {
             return { value: y, label: y };
         });
         return [
-            { value: 'all', label: 'All time' },
-            { value: '7d', label: 'Last 7 days' },
-            { value: '15d', label: 'Last 15 days' },
-            { value: '30d', label: 'Last 30 days' },
-            { value: '90d', label: 'Last 90 days' },
-            { value: 'ytd', label: 'Year to date' },
+            { value: 'all', label: 'All Time' },
+            { value: '7d', label: 'Last 7 Days' },
+            { value: '15d', label: 'Last 15 Days' },
+            { value: '30d', label: 'Last 30 Days' },
+            { value: '90d', label: 'Last 90 Days' },
+            { value: 'ytd', label: 'Year to Date' },
             ...years,
-            { value: 'range', label: 'Custom range…' },
+            { value: 'range', label: 'Custom Range…' },
         ];
     });
 
@@ -353,7 +353,7 @@ export class FilterBarComponent {
 
     protected readonly personSpan = computed<[string, string] | undefined>(() => {
         if (this.filters.personId() === ALL) {
-            return undefined;
+            return;
         }
         const range = this.analytics.personDateRange(this.filters.personId());
         return range[0] ? range : undefined;

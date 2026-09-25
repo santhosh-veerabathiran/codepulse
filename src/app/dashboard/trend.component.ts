@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, LINE_LABEL, LineCat, PeriodKind, ThemeStore } from '../core';
-import { ChartToggleComponent, mapTrendKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { ChartTipComponent } from './chart.tooltip.component';
 import { SERIES_DIMS, TREND_LAYOUT, resolveDim } from './constants';
 import { SelectComponent } from './select.component';
 import { ChartKind, ChartPoint, ChartTip, RankBucketDim, SelectOption, TrendBar, TrendChart } from './types';
+import { mapTrendKind } from './utils';
 
 const { w: W, h: H, ml: ML, mr: MR, mt: MT, mb: MB } = TREND_LAYOUT;
 const PW = W - ML - MR;
@@ -20,7 +21,6 @@ const PH = H - MT - MB;
             <div>
                 <p class="eyebrow">Trend</p>
                 <h2>{{ metricLabel() }} by {{ gran() }}</h2>
-                <p class="sub">{{ sub() }}</p>
             </div>
             <div class="t-ctrls">
                 <cp-select class="lines" label="Lines by category" [options]="lineOpts()" [value]="lineCat()" (picked)="setLineCat($event)" />
@@ -308,12 +308,12 @@ export class TrendComponent {
         const i = this.active();
         const points = this.chart().points;
         if (i < 0 || i >= points.length) {
-            return undefined;
+            return;
         }
         const p = points[i];
         const data = this.analytics.selectedCell()?.series.data[p.label];
         if (!data) {
-            return undefined;
+            return;
         }
         const active = this.metric();
         const counts = SERIES_DIMS.filter((d) => {

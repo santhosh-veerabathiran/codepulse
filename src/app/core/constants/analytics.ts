@@ -12,7 +12,7 @@ const catTotal = (a: Agg): number => {
 export const SORTS: SortDef[] = [
     {
         key: 'commits',
-        label: 'Commits (authored)',
+        label: 'Commits (Authored)',
         group: 'Output',
         format: format,
         value: (a) => {
@@ -21,7 +21,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'code',
-        label: 'Code lines',
+        label: 'Code Lines',
         group: 'Output',
         format: formatCompact,
         value: (a) => {
@@ -30,7 +30,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'lines',
-        label: 'Total lines changed',
+        label: 'Total Lines Changed',
         group: 'Output',
         format: formatCompact,
         value: (a) => {
@@ -39,7 +39,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'net_lines',
-        label: 'Net lines (added − deleted)',
+        label: 'Net Lines (Added − Deleted)',
         group: 'Output',
         format: formatCompact,
         value: (a) => {
@@ -48,7 +48,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'mr_merged',
-        label: 'Merge requests merged',
+        label: 'Merge Requests Merged',
         group: 'Output',
         format: format,
         value: (a) => {
@@ -57,7 +57,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'mr_opened',
-        label: 'Merge requests opened',
+        label: 'Merge Requests Opened',
         group: 'Output',
         format: format,
         value: (a) => {
@@ -66,7 +66,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'merges',
-        label: 'Merges into main',
+        label: 'Merges Into Main',
         group: 'Output',
         format: format,
         value: (a) => {
@@ -75,7 +75,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'merges_back',
-        label: 'Main → branch merges',
+        label: 'Main → Branch Merges',
         group: 'Output',
         format: format,
         value: (a) => {
@@ -84,7 +84,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'comment_lines',
-        label: 'Comment lines added',
+        label: 'Comment Lines Added',
         group: 'Output',
         format: formatCompact,
         value: (a) => {
@@ -93,7 +93,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'active_days',
-        label: 'Active days',
+        label: 'Active Days',
         group: 'Cadence',
         format: format,
         value: (a) => {
@@ -102,7 +102,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'commits_per_day',
-        label: 'Commits / active day',
+        label: 'Commits / Active Day',
         group: 'Cadence',
         format: (v) => {
             return v.toFixed(1);
@@ -116,7 +116,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'code_per_day',
-        label: 'Code lines / active day',
+        label: 'Code Lines / Active Day',
         group: 'Cadence',
         format: formatCompact,
         gate: (a) => {
@@ -128,7 +128,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'lines_per_day',
-        label: 'Lines / active day',
+        label: 'Lines / Active Day',
         group: 'Cadence',
         format: formatCompact,
         gate: (a) => {
@@ -140,7 +140,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'avg_size',
-        label: 'Mean commit size',
+        label: 'Mean Commit Size',
         group: 'Code craft',
         format: (v) => {
             return `${format(v)} ln`;
@@ -154,7 +154,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'reviews',
-        label: 'MRs reviewed for others',
+        label: 'MRs Reviewed for Others',
         group: 'Merge quality',
         format: format,
         value: (a) => {
@@ -163,7 +163,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'merge_rate',
-        label: 'Merge rate (% accepted)',
+        label: 'Merge Rate (% Accepted)',
         group: 'Merge quality',
         format: (v) => {
             return `${v.toFixed(0)}%`;
@@ -177,7 +177,7 @@ export const SORTS: SortDef[] = [
     },
     {
         key: 'code_pct',
-        label: 'Code % of lines changed',
+        label: 'Code % of Lines Changed',
         group: 'Composition',
         format: (v) => {
             return `${v.toFixed(0)}%`;
@@ -261,63 +261,63 @@ export const COMPARE_GROUPS: CompareGroup[] = [
         kind: MetricKind.Output,
         metrics: [
             {
-                label: 'Authored commits',
+                label: 'Authored Commits',
                 format: fCount,
                 value: (c) => {
                     return c.commits;
                 },
             },
             {
-                label: 'Merges into main',
+                label: 'Merges Into Main',
                 format: fCount,
                 value: (c) => {
                     return c.merges.toMain;
                 },
             },
             {
-                label: 'Main → branch merges',
+                label: 'Main → Branch Merges',
                 format: fCount,
                 value: (c) => {
                     return c.merges.toBranch;
                 },
             },
             {
-                label: 'MRs merged',
+                label: 'MRs Merged',
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.merged;
                 },
             },
             {
-                label: 'MRs opened',
+                label: 'MRs Opened',
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.authored;
                 },
             },
             {
-                label: 'MRs closed unmerged',
+                label: 'MRs Closed Unmerged',
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.closed;
                 },
             },
             {
-                label: 'Net lines (add − del)',
+                label: 'Net Lines (Add − Del)',
                 format: fLines,
                 value: (c) => {
                     return c.additions - c.deletions;
                 },
             },
             {
-                label: 'Active days',
+                label: 'Active Days',
                 format: fDays,
                 value: (c) => {
                     return c.days;
                 },
             },
             {
-                label: 'Commits / active day',
+                label: 'Commits / Active Day',
                 format: fRate,
                 value: (c) => {
                     return c.days ? c.commits / c.days : 0;
@@ -330,7 +330,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
         kind: MetricKind.Output,
         metrics: [
             {
-                label: 'Total lines changed',
+                label: 'Total Lines Changed',
                 format: fLines,
                 value: (c) => {
                     return c.additions + c.deletions;
@@ -344,7 +344,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 },
             },
             {
-                label: 'Comment lines',
+                label: 'Comment Lines',
                 format: fLines,
                 value: (c) => {
                     return c.commentAdd;
@@ -378,7 +378,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 },
             },
             {
-                label: 'Comment-line ratio',
+                label: 'Comment-Line Ratio',
                 format: fPct,
                 value: (c) => {
                     return percent(c.commentAdd, c.commentAdd + c.codeAdd);
@@ -392,7 +392,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 },
             },
             {
-                label: 'Test-to-code ratio',
+                label: 'Test-to-Code Ratio',
                 format: fPct,
                 value: (c) => {
                     return percent(c.categories['test'] || 0, (c.categories['test'] || 0) + (c.categories['code'] || 0));
@@ -405,34 +405,34 @@ export const COMPARE_GROUPS: CompareGroup[] = [
         kind: MetricKind.Craft,
         metrics: [
             {
-                label: 'Median commit size',
+                label: 'Median Commit Size',
                 format: fSize,
                 value: (c) => {
                     return c.sizes.median;
                 },
             },
             {
-                label: 'Mean commit size',
+                label: 'Mean Commit Size',
                 format: fSize,
                 value: (c) => {
                     return c.sizes.mean;
                 },
             },
             {
-                label: 'P90 commit size',
+                label: 'P90 Commit Size',
                 format: fSize,
                 value: (c) => {
                     return c.sizes.p90;
                 },
             },
             {
-                label: 'Code lines / commit',
+                label: 'Code Lines / Commit',
                 format: fRate,
                 value: (c) => {
                     return c.commits ? (c.categories['code'] || 0) / c.commits : 0;
                 },
             },
-            { label: 'Small commits ≤10 ln', format: fPct, lower: true, value: smallShare },
+            { label: 'Small Commits ≤10 ln', format: fPct, lower: true, value: smallShare },
         ],
     },
     {
@@ -440,30 +440,30 @@ export const COMPARE_GROUPS: CompareGroup[] = [
         kind: MetricKind.Craft,
         metrics: [
             {
-                label: 'Merge rate',
+                label: 'Merge Rate',
                 format: fPct,
                 value: (c) => {
                     return c.mergeRequests.rate || 0;
                 },
             },
             {
-                label: 'Median time-to-merge',
+                label: 'Median Time-to-Merge',
                 format: fDur,
                 lower: true,
                 value: (c) => {
                     return c.mergeRequests.timeToMerge || 0;
                 },
             },
-            { label: 'Fast merges (<4h)', format: fPct, value: fastShare },
+            { label: 'Fast Merges (<4h)', format: fPct, value: fastShare },
             {
-                label: 'Review comments / MR',
+                label: 'Review Comments / MR',
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.noteCount || 0;
                 },
             },
             {
-                label: 'Self-merge rate',
+                label: 'Self-Merge Rate',
                 format: fPct,
                 lower: true,
                 value: (c) => {
@@ -471,7 +471,7 @@ export const COMPARE_GROUPS: CompareGroup[] = [
                 },
             },
             {
-                label: 'MRs reviewed for others',
+                label: 'MRs Reviewed for Others',
                 format: fCount,
                 value: (c) => {
                     return c.mergeRequests.reviewed;

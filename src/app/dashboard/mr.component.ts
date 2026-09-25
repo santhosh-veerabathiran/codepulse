@@ -10,9 +10,8 @@ import { MrKpi, Seg, YearRow } from './types';
     imports: [ReplayDirective],
     template: `
         <div class="head">
-            <p class="eyebrow">Merge requests</p>
-            <h2>{{ name() }} — merge requests &amp; review</h2>
-            <p class="sub">Every MR they authored, by state. Time-to-merge and review comments are medians. "MRs they merged" counts integration done for others.</p>
+            <p class="eyebrow">Merge Requests</p>
+            <h2>{{ name() }} — Merge Requests &amp; Review</h2>
         </div>
 
         @if (!cell(); as _n) {
@@ -48,7 +47,7 @@ import { MrKpi, Seg, YearRow } from './types';
 
             @if (years().length) {
                 <div class="card block" *cpReplay="viewKey()">
-                    <p class="bh">MRs opened by year — merged · closed · open</p>
+                    <p class="bh">MRs Opened by Year — Merged · Closed · Open</p>
                     <div class="years">
                         @for (y of years(); track y.year) {
                             <div class="yr">

@@ -13,9 +13,8 @@ import { CmpBlock, CmpCell, CmpRow, ComparePerson, RadarModel, SelectOption, Sta
     template: `
         <div class="head">
             <div>
-                <p class="eyebrow">Head to head</p>
-                <h2>Compare contributors</h2>
-                <p class="sub">Compare up to {{ max }} people side by side — every metric, within the current repo &amp; period.</p>
+                <p class="eyebrow">Head to Head</p>
+                <h2>Compare Contributors</h2>
             </div>
             <button type="button" class="ghost" (click)="exportCsv()">Export CSV</button>
         </div>
@@ -548,7 +547,7 @@ export class CompareComponent {
     protected readonly radar = computed<RadarModel | undefined>(() => {
         const ppl = this.people();
         if (ppl.length < 2) {
-            return undefined;
+            return;
         }
         const catTot = (c: Cell): number => {
             return (

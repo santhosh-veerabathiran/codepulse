@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ALL, AnalyticsStore, FiltersStore, PersonId, RankRow, sortByKey, ThemeStore } from '../core';
-import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { LEADERBOARD_CAP } from './constants';
 import { ChartKind } from './types';
+import { mapRankKind } from './utils';
 
 @Component({
     selector: 'cp-leaderboard',
@@ -12,11 +13,8 @@ import { ChartKind } from './types';
     template: `
         <div class="lb-head">
             <div>
-                <p class="eyebrow">The team</p>
+                <p class="eyebrow">The Team</p>
                 <h2>Ranked by {{ sortLabel() }}</h2>
-                <p class="sub">
-                    {{ expanded() ? 'All ' + rows().length : 'Top ' + cap + ' of ' + rows().length }} contributors — click anyone to open their view. Craft signals, not a performance ranking; line counts exclude generated / vendored files.
-                </p>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>
@@ -39,7 +37,7 @@ import { ChartKind } from './types';
                 <p class="empty">No contributors in this view.</p>
             }
             @if (hidden() > 0) {
-                <button type="button" class="more" (click)="toggle()">{{ expanded() ? 'Show top ' + cap : 'Show all ' + rows().length + ' contributors' }}</button>
+                <button type="button" class="more" (click)="toggle()">{{ expanded() ? 'Show Top ' + cap : 'Show All ' + rows().length + ' Contributors' }}</button>
             }
         </div>
     `,
@@ -258,7 +256,7 @@ export class LeaderboardComponent {
         return sortByKey(this.filters.sortKey());
     });
     protected readonly sortLabel = computed<string>(() => {
-        return this.def().label.toLowerCase();
+        return this.def().label;
     });
     private readonly max = computed<number>(() => {
         return Math.max(

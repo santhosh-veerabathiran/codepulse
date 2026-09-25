@@ -10,9 +10,8 @@ import { BiggestRow } from './types';
     imports: [ReplayDirective],
     template: `
         <div class="head">
-            <p class="eyebrow">Heavy lifts</p>
-            <h2>{{ name() }} — biggest single commits</h2>
-            <p class="sub">The largest commits by lines changed in this view — the outsized landings.</p>
+            <p class="eyebrow">Heavy Lifts</p>
+            <h2>{{ name() }} — Biggest Single Commits</h2>
         </div>
         @if (!rows().length) {
             <p class="empty card">No commits in this view.</p>

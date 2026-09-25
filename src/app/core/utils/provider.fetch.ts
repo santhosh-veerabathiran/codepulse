@@ -81,7 +81,7 @@ export class ProviderFetch {
     private async fetchOne(url: string, headers: Record<string, string>): Promise<Record<string, any> | undefined> {
         const res = await fetch(url, { headers });
         if (!res.ok) {
-            return undefined;
+            return;
         }
         return (await res.json()) as Record<string, any>;
     }

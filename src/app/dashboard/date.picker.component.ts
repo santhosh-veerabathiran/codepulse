@@ -83,7 +83,7 @@ import { DayCell, ViewMonth } from './types';
             position: absolute;
             top: calc(100% + 6px);
             left: 0;
-            z-index: 200;
+            z-index: 1000;
             width: 244px;
             background: var(--surface);
             border: 1px solid var(--line);

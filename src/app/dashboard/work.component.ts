@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, ThemeStore, format, formatCompact, percent } from '../core';
-import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { TYPE_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
 import { ChartKind, DonutItem, RankBucketDim, RankMetric, ScopeRow, Tier, TypeRow } from './types';
+import { mapRankKind } from './utils';
 
 @Component({
     selector: 'cp-work',
@@ -16,9 +17,8 @@ import { ChartKind, DonutItem, RankBucketDim, RankMetric, ScopeRow, Tier, TypeRo
         } @else {
             <div class="head">
                 <div>
-                    <p class="eyebrow">The shape of the work</p>
-                    <h2>{{ name() }} — what kind of commits</h2>
-                    <p class="sub">Commit types by {{ rankDim().label }} in this view, ranked by volume.</p>
+                    <p class="eyebrow">The Shape of the Work</p>
+                    <h2>{{ name() }} — What Kind of Commits</h2>
                 </div>
                 <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
             </div>
@@ -49,8 +49,7 @@ import { ChartKind, DonutItem, RankBucketDim, RankMetric, ScopeRow, Tier, TypeRo
 
             <div class="head second">
                 <p class="eyebrow">Familiarity</p>
-                <h2>Where they're familiar</h2>
-                <p class="sub">Service areas they touch most — tiers are a rough read of ownership depth.</p>
+                <h2>Where They're Familiar</h2>
             </div>
             <div class="card block">
                 @for (pass of [renderKey()]; track pass) {

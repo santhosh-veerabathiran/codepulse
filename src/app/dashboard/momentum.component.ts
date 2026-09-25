@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AnalyticsStore, FiltersStore, ThemeStore, format, formatCompact } from '../core';
-import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { SERIES_DIMS, resolveDim } from './constants';
 import { ShareDonutComponent } from './share.donut.component';
 import { ChartKind, DonutItem, MomentumRow, RankBucketDim, RankMetric } from './types';
+import { mapRankKind } from './utils';
 
 @Component({
     selector: 'cp-momentum',
@@ -14,8 +15,7 @@ import { ChartKind, DonutItem, MomentumRow, RankBucketDim, RankMetric } from './
         <div class="head">
             <div>
                 <p class="eyebrow">Momentum</p>
-                <h2>{{ name() }} — year over year</h2>
-                <p class="sub">{{ rankDim().label }} per year with the change against the year before — the shape of the trajectory.</p>
+                <h2>{{ name() }} — Year over Year</h2>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>
@@ -237,7 +237,7 @@ export class MomentumComponent {
 
     private deltaOf(current: number, previous: number): MomentumRow['delta'] {
         if (!previous) {
-            return undefined;
+            return;
         }
         const change = Math.round(((current - previous) / previous) * 100);
         if (change > 0) {

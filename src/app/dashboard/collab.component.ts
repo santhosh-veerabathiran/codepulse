@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FactsStore, FiltersStore, MR, MrState, ThemeStore, percent } from '../core';
-import { ChartToggleComponent, mapRankKind } from './chart.toggle.component';
+import { ChartToggleComponent } from './chart.toggle.component';
 import { ChartKind, Integrator, Rel } from './types';
+import { mapRankKind } from './utils';
 
 @Component({
     selector: 'cp-collab',
@@ -12,8 +13,7 @@ import { ChartKind, Integrator, Rel } from './types';
         <div class="head">
             <div>
                 <p class="eyebrow">Collaboration</p>
-                <h2>Who reviews &amp; merges</h2>
-                <p class="sub">Integration relationships across the team, within the current repo &amp; period.</p>
+                <h2>Who Reviews &amp; Merges</h2>
             </div>
             <cp-chart-toggle [kinds]="rankKinds" [value]="kind()" (picked)="setKind($event)" />
         </div>

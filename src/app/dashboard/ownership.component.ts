@@ -4,6 +4,7 @@ import { ALL, AnalyticsStore, FactsStore, FiltersStore, formatCompact, OwnContri
 import { ChartToggleComponent } from './chart.toggle.component';
 import { ReplayDirective } from './replay.directive';
 import { ChartKind } from './types';
+
 @Component({
     selector: 'cp-ownership',
     standalone: true,
@@ -12,15 +13,8 @@ import { ChartKind } from './types';
     template: `
         <div class="head">
             <div>
-                <p class="eyebrow">Service ownership</p>
-                <h2>{{ personMode() ? name() + ' — where they own the code' : 'Bus factor &amp; ownership' }}</h2>
-                <p class="sub">
-                    {{
-                        personMode()
-                            ? "Each service's code that belongs to them. Blue = primary owner (≥50%)."
-                            : "Top contributor's share of each service's code. Red = one person owns ≥70% (fragile); green = well-shared. Click a row for the full split."
-                    }}
-                </p>
+                <p class="eyebrow">Service Ownership</p>
+                <h2>{{ personMode() ? name() + ' — Where They Own the Code' : 'Bus Factor &amp; Ownership' }}</h2>
             </div>
             <div class="ctrls">
                 <cp-chart-toggle [kinds]="kinds" [value]="barKind()" (picked)="setKind($event)" />
@@ -41,7 +35,7 @@ import { ChartKind } from './types';
                     <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r: r }" />
                 }
                 @if (appsTotal() > cap) {
-                    <button type="button" class="more" (click)="toggleApps()">{{ appsExp() ? 'Show top ' + cap : 'Show all ' + appsTotal() + ' applications' }}</button>
+                    <button type="button" class="more" (click)="toggleApps()">{{ appsExp() ? 'Show Top ' + cap : 'Show All ' + appsTotal() + ' Applications' }}</button>
                 }
             </div>
         }
@@ -55,7 +49,7 @@ import { ChartKind } from './types';
                     <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ r: r }" />
                 }
                 @if (libsTotal() > cap) {
-                    <button type="button" class="more" (click)="toggleLibs()">{{ libsExp() ? 'Show top ' + cap : 'Show all ' + libsTotal() + ' libraries' }}</button>
+                    <button type="button" class="more" (click)="toggleLibs()">{{ libsExp() ? 'Show Top ' + cap : 'Show All ' + libsTotal() + ' Libraries' }}</button>
                 }
             </div>
         }
