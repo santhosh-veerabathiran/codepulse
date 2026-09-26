@@ -70,10 +70,11 @@ export class FactsStore {
         }
         this.error.set('');
         this.loading.set(true);
-        await this.db.put(account.id, facts);
+        const normalized = this.normalize(facts);
+        await this.db.put(account.id, normalized);
         this.accounts.update(account.id, { dataAt: Date.now() });
         this.accounts.setActive(account.id);
-        this.facts.set(facts);
+        this.facts.set(normalized);
         this.loading.set(false);
     }
 
@@ -137,7 +138,7 @@ export class FactsStore {
         this.error.set('');
         this.loading.set(true);
         const facts = await this.db.get(id);
-        this.facts.set(facts);
+        this.facts.set(facts ? this.normalize(facts) : facts);
         this.loading.set(false);
     }
 
@@ -177,7 +178,7 @@ export class FactsStore {
         }
         try {
             const facts = await this.db.get(active.id);
-            this.facts.set(facts);
+            this.facts.set(facts ? this.normalize(facts) : facts);
         } catch {
             this.error.set('Could not read the local data store.');
         }
@@ -190,5 +191,17 @@ export class FactsStore {
             return f as Facts;
         }
         return;
+    }
+
+    // A snapshot may omit optional collections (older exports, partial imports); default
+    // every expected array so panels never read a field off undefined.
+    private normalize(facts: Facts): Facts {
+        const out = { ...facts } as unknown as Record<string, unknown>;
+        for (const key of ['F', 'MG', 'MR', 'AF', 'CM', 'MM', 'apps', 'appKind', 'types', 'scopes', 'repos', 'persons', 'roster', 'years']) {
+            if (!Array.isArray(out[key])) {
+                out[key] = [];
+            }
+        }
+        return out as unknown as Facts;
     }
 }

@@ -45,16 +45,36 @@ export class AnalyticsStore {
     }
 
     readonly agg = computed<Record<number, Agg>>(() => {
-        return this.personAgg();
+        try {
+            return this.personAgg();
+        } catch (error) {
+            console.error('agg computation failed', error);
+            return {};
+        }
     });
     readonly ranked = computed<RankRow[]>(() => {
-        return this.rankTeam();
+        try {
+            return this.rankTeam();
+        } catch (error) {
+            console.error('ranked computation failed', error);
+            return [];
+        }
     });
     readonly selectedCell = computed<Cell | null>(() => {
-        return this.buildCell(this.filters.personId());
+        try {
+            return this.buildCell(this.filters.personId());
+        } catch (error) {
+            console.error('selectedCell computation failed', error);
+            return null;
+        }
     });
     readonly ownership = computed<Record<string, OwnEntry>>(() => {
-        return this.appOwn();
+        try {
+            return this.appOwn();
+        } catch (error) {
+            console.error('ownership computation failed', error);
+            return {};
+        }
     });
 
     buildCell(pid: PersonId): Cell | null {
@@ -90,7 +110,7 @@ export class AnalyticsStore {
         let min = '';
         let max = '';
 
-        for (const row of facts.F) {
+        for (const row of facts.F ?? []) {
             if (!f.okRepo(row[F.Repo]) || (!pAll && row[F.Person] !== P) || !f.inScope(row[F.Date])) {
                 continue;
             }
@@ -128,28 +148,28 @@ export class AnalyticsStore {
             (cell.month[mo] = cell.month[mo] || [0, 0, 0])[0]++;
             cell.month[mo][1] += ln;
             cell.month[mo][2] += row[F.Code];
-            const t = facts.types[row[F.Type]];
+            const t = facts.types?.[row[F.Type]] ?? '';
             (cell.types[t] = cell.types[t] || [0, 0])[0]++;
             cell.types[t][1] += ln;
-            if (row[F.App] >= 0) {
-                const app = facts.apps[row[F.App]];
+            const app = row[F.App] >= 0 ? facts.apps?.[row[F.App]] : undefined;
+            if (app !== undefined) {
                 (cell.scopes[app] = cell.scopes[app] || [0, 0])[0]++;
                 cell.scopes[app][1] += ln;
             }
             sizes.push(ln);
             if (row[F.Big] >= 0) {
-                const cm = facts.CM[row[F.Big] as number];
+                const cm = facts.CM?.[row[F.Big] as number];
                 bigList.push({
                     lines: row[F.Add] + row[F.Del],
                     date,
-                    kind: facts.types[row[F.Type]],
-                    scope: row[F.App] >= 0 ? facts.apps[row[F.App]] : '',
+                    kind: t,
+                    scope: app ?? '',
                     title: cm?.[1] ?? '',
                     sha: cm?.[0] ?? '',
-                    repo: facts.repos[row[F.Repo]],
+                    repo: facts.repos?.[row[F.Repo]] ?? '',
                 });
             }
-            const rp = facts.repos[row[F.Repo]];
+            const rp = facts.repos?.[row[F.Repo]] ?? '';
             (cell.byrepo[rp] = cell.byrepo[rp] || newBucket())[0]++;
             cell.byrepo[rp][1] += ln;
             cell.byrepo[rp][2] += row[F.Code];
@@ -165,7 +185,7 @@ export class AnalyticsStore {
             (dSeries[bk] = dSeries[bk] || new Set()).add(date);
         }
 
-        for (const g of facts.MG) {
+        for (const g of facts.MG ?? []) {
             if (!f.okRepo(g[MG.Repo]) || (!pAll && g[MG.Person] !== P) || !f.inScope(g[MG.Date])) {
                 continue;
             }
@@ -182,7 +202,7 @@ export class AnalyticsStore {
             (cell.byrepo[facts.repos[g[MG.Repo]]] = cell.byrepo[facts.repos[g[MG.Repo]]] || newBucket())[mergeSlot]++;
         }
 
-        for (const m of facts.MR) {
+        for (const m of facts.MR ?? []) {
             if (!f.okRepo(m[MR.Repo])) {
                 continue;
             }
@@ -304,7 +324,7 @@ export class AnalyticsStore {
             }
             return A[p];
         };
-        for (const row of facts.F) {
+        for (const row of facts.F ?? []) {
             if (!f.okRepo(row[F.Repo]) || !f.inScope(row[F.Date])) {
                 continue;
             }
@@ -323,7 +343,7 @@ export class AnalyticsStore {
                 a.categories[this.categoryNames[j]] = (a.categories[this.categoryNames[j]] || 0) + (row[F.Code + j] as number);
             }
         }
-        for (const g of facts.MG) {
+        for (const g of facts.MG ?? []) {
             if (!f.okRepo(g[MG.Repo]) || !f.inScope(g[MG.Date])) {
                 continue;
             }
@@ -335,7 +355,7 @@ export class AnalyticsStore {
                 a.merges.toMain++;
             }
         }
-        for (const m of facts.MR) {
+        for (const m of facts.MR ?? []) {
             if (!f.okRepo(m[MR.Repo])) {
                 continue;
             }
@@ -398,11 +418,14 @@ export class AnalyticsStore {
         }
         const f = this.filters;
         const S: Record<string, OwnEntry> = {};
-        for (const a of facts.AF) {
+        for (const a of facts.AF ?? []) {
             if (!f.okRepo(a[AF.Repo]) || !f.inScope(a[AF.Date]) || !a[AF.Lines]) {
                 continue;
             }
-            const app = facts.apps[a[AF.App]];
+            const app = facts.apps?.[a[AF.App]];
+            if (app === undefined) {
+                continue;
+            }
             const entry = (S[app] = S[app] || { total: 0, by: {} });
             entry.total += a[AF.Lines];
             entry.by[a[AF.Person]] = (entry.by[a[AF.Person]] || 0) + a[AF.Lines];
@@ -428,7 +451,7 @@ export class AnalyticsStore {
         const f = this.filters;
         let min = '';
         let max = '';
-        for (const row of facts.F) {
+        for (const row of facts.F ?? []) {
             if (row[F.Person] !== id || !f.okRepo(row[F.Repo])) {
                 continue;
             }
