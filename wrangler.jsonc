@@ -1,0 +1,12 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "santhosh-veerabathiran-codepulse",
+    "compatibility_date": "2026-09-25",
+    "observability": {
+        "enabled": true
+    },
+    "assets": {
+        "directory": "dist/codepulse/browser",
+        "not_found_handling": "single-page-application"
+    }
+}
