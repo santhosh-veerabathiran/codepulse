@@ -8,6 +8,5 @@
     "assets": {
         "directory": "dist/codepulse/browser",
         "not_found_handling": "single-page-application"
-    },
-    "routes": [{ "pattern": "codepulse.santhosh-veerabathiran.com", "custom_domain": true }]
+    }
 }
