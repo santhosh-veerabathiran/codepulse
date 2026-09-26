@@ -134,7 +134,6 @@ import { Delta, KpiCard, KpiSpec } from './types';
             }
             @keyframes kpi-pop {
                 from {
-                    opacity: 0;
                     transform: scale(0.96) translateY(6px);
                 }
             }

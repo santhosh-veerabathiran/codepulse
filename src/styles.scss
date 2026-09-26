@@ -1224,29 +1224,27 @@ svg.radar {
     height: 17px;
 }
 
-/* ---- reveal motion ---- */
+/* ---- reveal motion ----
+   Transform-only entrances: a paused/throttled animation (e.g. a tab
+   backgrounded during load) freezes at the `from` frame, so it must never be
+   invisible — otherwise content stays hidden. Motion only, opacity stays 1. */
 .rv {
-    opacity: 0;
     transform: translateY(14px);
     animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     animation-delay: calc(var(--i, 0) * 70ms);
 }
 @keyframes rise {
     to {
-        opacity: 1;
         transform: none;
     }
 }
 
-/* Section entrance — `backwards` fill keeps the resting state at opacity:1 (no
-   persistent opacity:0 that would trap absolutely-positioned dropdown panels). */
 @media (prefers-reduced-motion: no-preference) {
     .content > section {
         animation: section-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
     @keyframes section-rise {
         from {
-            opacity: 0;
             transform: translateY(14px);
         }
     }
